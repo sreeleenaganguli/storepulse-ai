@@ -1,5 +1,27 @@
-fastapi
-uvicorn
-pydantic
-scikit-learn
-numpy
+# Web framework
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-multipart==0.0.12
+python-dotenv==1.0.1
+
+# Gemini
+google-generativeai==0.8.3
+
+# LangGraph / LangChain
+langgraph==0.2.53
+langchain-core==0.3.21
+
+# Embeddings — local, no API key needed
+sentence-transformers==3.3.1
+torch==2.5.1
+numpy==1.26.4
+scikit-learn==1.5.2
+
+# BM25 keyword search
+rank-bm25==0.2.2
+
+# Vector DB
+chromadb==0.5.23
+
+# Pydantic
+pydantic==2.10.3

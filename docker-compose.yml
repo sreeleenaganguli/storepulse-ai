@@ -1,9 +1,40 @@
-version: '3.8'
+version: "3.9"
+
 services:
+
   backend:
-    build: ./backend
-    ports: ['8000:8000']
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: storepulse-backend
+    restart: unless-stopped
+    env_file: ./backend/.env
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./backend/data:/app/data
+      - ./backend/chroma_db:/app/chroma_db
+      - ./backend/audit.jsonl:/app/audit.jsonl
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
   frontend:
-    build: ./frontend
-    ports: ['3000:3000']
-    depends_on: [backend]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: storepulse-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  chroma_data:

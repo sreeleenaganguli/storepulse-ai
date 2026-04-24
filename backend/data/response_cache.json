@@ -1,0 +1,45 @@
+{
+  "13d5dbdd42e0e780": {
+    "conflicts": [],
+    "root_cause": "Rule-based: loyalty_api_unavailable",
+    "probable_category": "loyalty_api_unavailable",
+    "top_causes": [
+      "Pattern match: loyalty_api_unavailable",
+      "LLM unavailable \u2014 rule-based fallback"
+    ],
+    "confidence": 0.65,
+    "confidence_rationale": "Fallback: error code 'LOYALTY_API_503' maps to 'loyalty_api_unavailable' in PATTERN_MAP. Top runbook match: loyalty_api_unavailable.md at 60%.",
+    "reasoning_trace": "1) Error codes found: ['LOYALTY_API_503', 'LOYALTY_TIMEOUT', 'CIRCUIT_OPEN']\n2) Taxonomy match for loyalty-api: ['LOYALTY_API_503', 'LOYALTY_TIMEOUT', 'CIRCUIT_OPEN']\n3) PATTERN_MAP suggests: loyalty_api_unavailable\n4) Top runbook: loyalty_api_unavailable.md (60%)\n5) LLM unavailable \u2014 rule-based conclusion used.\n",
+    "needs_reretrieval": false,
+    "reretrieval_query": ""
+  },
+  "3b31470ce068b5bb": {
+    "conflicts": [],
+    "root_cause": "Rule-based: receipt_printer_failure",
+    "probable_category": "receipt_printer_failure",
+    "top_causes": [
+      "Pattern match: receipt_printer_failure",
+      "LLM unavailable \u2014 rule-based fallback"
+    ],
+    "confidence": 0.65,
+    "confidence_rationale": "Fallback: error code 'PRINTER_OFFLINE_ERR' maps to 'receipt_printer_failure' in PATTERN_MAP. Top runbook match: receipt_printer_failure.md at 58%.",
+    "reasoning_trace": "1) Error codes found: ['PRINTER_OFFLINE_ERR', 'CUPS_QUEUE_BLOCKED', 'RECEIPT_SVC_TIMEOUT']\n2) Taxonomy match for receipt-service: ['PRINTER_OFFLINE_ERR', 'CUPS_QUEUE_BLOCKED', 'RECEIPT_SVC_TIMEOUT']\n3) PATTERN_MAP suggests: receipt_printer_failure\n4) Top runbook: receipt_printer_failure.md (58%)\n5) LLM unavailable \u2014 rule-based conclusion used.\n",
+    "needs_reretrieval": false,
+    "reretrieval_query": ""
+  },
+  "d186c0e7692d2b5a": {
+    "conflicts": [],
+    "root_cause": "The payment gateway is experiencing timeouts, leading to payment retries failing and the payment service becoming unavailable, likely due to an upstream service degradation or network connectivity issue.",
+    "probable_category": "payment_timeout",
+    "top_causes": [
+      "Upstream payment gateway service degradation or maintenance",
+      "Network connectivity loss between store and payment gateway",
+      "Payment gateway certificate expiry causing TLS handshake failure"
+    ],
+    "confidence": 0.67,
+    "confidence_rationale": "The error code 'GW_TIMEOUT_503' is explicitly listed in the 'payment_timeout.md' runbook and is present in the logs. 'PAYMENT_SVC_UNAVAILABLE' is also in the known taxonomy and is a direct symptom of payment gateway issues. The incident symptoms (payment retries failing, customers unable to complete basket, multiple SCO units affected) align perfectly with the 'payment_timeout' pattern. The provided 'combined score: 67%' falls within the 0.60-0.79 range for a runbook match that is not 'strong' (which would be 0.80-0.95).",
+    "reasoning_trace": "1) Error codes 'GW_TIMEOUT_503' and 'PAYMENT_SVC_UNAVAILABLE' were found in the logs and incident description. 2) Both error codes are present in the 'Known taxonomy for pos-payment'. No conflicts detected. 3) The 'GW_TIMEOUT_503' error code and the symptoms ('Payment retries failing on 18 SCO units', 'customers unable to complete basket', 'GW_TIMEOUT_503 flooding logs') directly match the 'payment_timeout.md' runbook's symptoms and error codes. The 'PAYMENT_SVC_UNAVAILABLE' and 'Circuit breaker OPEN' messages further support a payment gateway issue. The 'Top runbook match: payment_timeout.md (combined score: 67%)' confirms this. 4) Conclusion is a payment gateway timeout issue, with potential causes listed from the runbook.",
+    "needs_reretrieval": false,
+    "reretrieval_query": ""
+  }
+}

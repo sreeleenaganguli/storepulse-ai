@@ -15,12 +15,26 @@ CACHE_FILE = BASE_DIR / "embed_cache.json"
 # ── API Keys ─────────────────────────────────────────────────────────────
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
-# ── Model names (Gemini-only) ─────────────────────────────────────────────
-MODEL_INGESTOR      = "gemini-2.5-flash-lite"   # fast entity extraction
-MODEL_DIAGNOSTICIAN = "gemini-2.5-pro"           # best reasoning available
-MODEL_DIAG_FALLBACK = "gemini-1.5-pro"           # fallback if 2.5-pro quota hit
-MODEL_PLANNER       = "gemini-2.5-flash"         # fast + instruction-following
-MODEL_FAST          = "gemini-2.5-flash-lite"    # validator / quick calls
+# ── Model names — personal laptop (free tier, flash only) ─────────────────────
+MODEL_INGESTOR       = "gemini-2.5-flash"   # working ✅
+MODEL_DIAGNOSTICIAN  = "gemini-2.5-flash"   # working ✅
+MODEL_DIAG_FALLBACK  = "gemini-2.5-flash"   # same — only one working
+MODEL_PLANNER        = "gemini-2.5-flash"   # working ✅
+MODEL_FAST           = "gemini-2.5-flash"   # working ✅
+
+# # ── Model names (Gemini-only) ─────────────────────────────────────────────
+# MODEL_INGESTOR      = "gemini-2.5-flash-lite"   # fast entity extraction
+# MODEL_DIAGNOSTICIAN = "gemini-2.5-pro"           # best reasoning available
+# MODEL_DIAG_FALLBACK = "gemini-1.5-pro"           # fallback if 2.5-pro quota hit
+# MODEL_PLANNER       = "gemini-2.5-flash"         # fast + instruction-following
+# MODEL_FAST          = "gemini-2.5-flash-lite"    # validator / quick calls
+
+# # config.py — optimised for free Gemini API tier
+# MODEL_INGESTOR       = "gemini-2.0-flash-001"    # fastest, cheapest, great for JSON extraction
+# MODEL_DIAGNOSTICIAN  = "gemini-2.5-pro"           # best reasoning on free tier
+# MODEL_DIAG_FALLBACK  = "gemini-2.5-flash"         # fallback if 2.5-pro quota hits
+# MODEL_PLANNER        = "gemini-2.5-flash"         # fast + good instruction following
+# MODEL_PLANNER_FALLBACK = "gemini-2.0-flash-001"  # last resort
 
 # ── RAG ───────────────────────────────────────────────────────────────────
 CHUNK_SIZE             = 1400
@@ -72,4 +86,13 @@ PATTERN_MAP = {
     "SWITCH_PORT_DOWN":       "store_network_flap",
 }
 
-KNOWN_PATTERNS = list(set(PATTERN_MAP.values()))
+# KNOWN_PATTERNS = list(set(PATTERN_MAP.values()))
+
+
+# # ── Model names (hackathon multi-provider) ─────────────────────────────────
+# MODEL_INGESTOR       = "azure/genailab-maas-gpt-4.1-mini"          # fast + structured JSON
+# MODEL_DIAGNOSTICIAN  = "azure_ai/genailab-maas-DeepSeek-R1"        # best reasoning
+# MODEL_DIAG_FALLBACK  = "gemini-2.5-pro"                            # fallback reasoning
+# MODEL_PLANNER        = "azure/genailab-maas-gpt-4.1"               # best instruction-following
+# MODEL_PLANNER_FALLBACK = "azure_ai/genailab-maas-Phi-4-reasoning"  # small but strong
+# MODEL_EMBEDDING      = "azure/genailab-maas-text-embedding-3-1arge" # replace current embedder

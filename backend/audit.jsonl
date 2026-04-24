@@ -7,3 +7,13 @@
 {"event": "triage_start", "incident_id": "INC-SCN-20241201-0007", "service": "scan-service", "severity": "Sev1", "attempt": 1, "ts": "2026-04-24T20:12:59.809380+00:00"}
 {"event": "triage_complete", "incident_id": "INC-SCN-20241201-0007", "attempt": 1, "category": "barcode_scanner_issue", "confidence": 0.35, "validation_passed": true, "ts": "2026-04-24T20:13:38.113846+00:00"}
 {"event": "human_confirm", "incident_id": "INC-SCN-20241201-0007", "confirmed_steps": [1, 2, 3], "rejected_steps": [], "ts": "2026-04-24T20:14:48.615306+00:00"}
+{"event": "triage_start", "incident_id": "INC-SCN-20241201-0007", "service": "scan-service", "severity": "Sev1", "attempt": 1, "ts": "2026-04-24T20:26:22.536690+00:00"}
+{"event": "triage_complete", "incident_id": "INC-SCN-20241201-0007", "attempt": 1, "category": "barcode_scanner_issue", "confidence": 0.65, "validation_passed": true, "ts": "2026-04-24T20:26:37.998770+00:00"}
+{"event": "triage_start", "incident_id": "INC-LOY-20241120-0033", "service": "loyalty-api", "severity": "Sev2", "attempt": 1, "ts": "2026-04-24T20:52:48.429322+00:00"}
+{"event": "triage_complete", "incident_id": "INC-LOY-20241120-0033", "attempt": 1, "category": "loyalty_api_unavailable", "confidence": 0.65, "validation_passed": true, "ts": "2026-04-24T20:53:31.243378+00:00"}
+{"event": "triage_start", "incident_id": "INC-LOY-20241120-0033", "service": "loyalty-api", "severity": "Sev2", "attempt": 1, "ts": "2026-04-24T21:09:53.391779+00:00"}
+{"event": "triage_complete", "incident_id": "INC-LOY-20241120-0033", "attempt": 1, "category": "loyalty_api_unavailable", "confidence": 0.65, "validation_passed": true, "ts": "2026-04-24T21:10:02.802547+00:00"}
+{"event": "triage_start", "incident_id": "INC-RCP-20241108-0041", "service": "receipt-service", "severity": "Sev2", "attempt": 1, "ts": "2026-04-24T21:18:35.057863+00:00"}
+{"event": "triage_complete", "incident_id": "INC-RCP-20241108-0041", "attempt": 1, "category": "receipt_printer_failure", "confidence": 0.65, "validation_passed": true, "ts": "2026-04-24T21:19:23.151981+00:00"}
+{"event": "triage_start", "incident_id": "INC-SCO-20241115-0019", "service": "pos-payment", "severity": "Sev1", "attempt": 1, "ts": "2026-04-24T21:26:35.671713+00:00"}
+{"event": "triage_complete", "incident_id": "INC-SCO-20241115-0019", "attempt": 1, "category": "payment_timeout", "confidence": 0.67, "validation_passed": true, "ts": "2026-04-24T21:27:29.682918+00:00"}

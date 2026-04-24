@@ -1,6 +1,3 @@
-"""Local embedding via sentence-transformers — no API key required.
-Uses all-MiniLM-L6-v2 (~80MB, downloads once on first run).
-Results are MD5-cached to embed_cache.json so restart is instant."""
 import hashlib, json
 from typing import List
 from config import CACHE_FILE

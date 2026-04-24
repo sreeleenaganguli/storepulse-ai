@@ -51,3 +51,6 @@ class AgentState(TypedDict, total=False):
 
     # Streaming
     stream_events: List[Dict[str, Any]]
+
+    feedback_context: str      # ← prior rejected analyses + engineer feedback
+    attempt_number: int        # ← which retry attempt this is (1 = first run)

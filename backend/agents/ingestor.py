@@ -1,7 +1,6 @@
-"""Ingestor Agent — uses new google.genai SDK (replaces deprecated google.generativeai)."""
+"""Ingestor Agent — uses new google.genai SDK."""
 from __future__ import annotations
 import json, re
-from typing import Optional
 from google import genai
 from google.genai import types
 from config import GEMINI_API_KEY, MODEL_INGESTOR
@@ -25,12 +24,31 @@ Extract structured information from the incident and return ONLY valid JSON:
 }
 Return JSON only. No markdown fences."""
 
+
+def _parse_log_line(line: str, service: str) -> dict:
+    ts_match = re.search(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", line)
+    codes = re.findall(r"[A-Z][A-Z0-9_]{3,}", line)
+    level = "INFO"
+    for lvl in ["ERROR", "WARN", "WARNING", "INFO", "DEBUG"]:
+        if lvl in line.upper():
+            level = "WARN" if lvl == "WARNING" else lvl
+            break
+    return {
+        "time":       ts_match.group() if ts_match else "",
+        "level":      level,
+        "service":    service,
+        "message":    line[:200],
+        "error_code": codes[-1] if codes else None,
+    }
+
+
 def run_ingestor(state: AgentState) -> dict:
-    inc = state["incident"]
+    inc          = state["incident"]
+    prior_events = state.get("stream_events", [])  # ← accumulate
 
     event_start = {
         "type": "agent_step", "agent": "ingestor",
-        "status": "running", "message": "Extracting entities and parsing log timeline..."
+        "status": "running", "message": "Extracting entities and parsing log timeline...",
     }
 
     prompt = f"""INCIDENT:
@@ -55,51 +73,36 @@ Extract all structured information. Return JSON only."""
                 temperature=0.0,
             )
         )
-        raw = resp.text.strip()
-        raw = re.sub(r"^```(?:json)?\s*", "", raw)
+        raw = re.sub(r"^```(?:json)?\s*", "", resp.text.strip())
         raw = re.sub(r"\s*```$", "", raw)
         entities = json.loads(raw)
-    except Exception as e:
+    except Exception:
         entities = {
-            "primary_error_code": None,
-            "error_codes": [],
-            "affected_services": [inc.service],
+            "primary_error_code":  None,
+            "error_codes":         [],
+            "affected_services":   [inc.service],
             "affected_units_count": None,
-            "log_timeline": [],
-            "severity_path": inc.symptoms,
-            "keywords": inc.symptoms.split()[:5],
+            "log_timeline":        [],
+            "severity_path":       inc.symptoms,
+            "keywords":            inc.symptoms.split()[:5],
         }
 
-    # Parse raw log lines into structured rows
     raw_logs = []
     if inc.log_snippet:
         for line in inc.log_snippet.strip().splitlines():
             line = line.strip()
-            if not line:
-                continue
-            codes = re.findall(r"[A-Z][A-Z0-9_]{3,}", line)
-            level = "INFO"
-            for lvl in ["ERROR", "WARN", "WARNING", "INFO", "DEBUG"]:
-                if lvl in line.upper():
-                    level = "WARN" if lvl == "WARNING" else lvl
-                    break
-            raw_logs.append({
-                "time": (re.search(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", line) or type("", (), {"group": lambda self: ""})()).group() if hasattr(re.search(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", line), "group") else "",
-                "level": level,
-                "service": inc.service,
-                "message": line[:200],
-                "error_code": codes[-1] if codes else None,
-            })
+            if line:
+                raw_logs.append(_parse_log_line(line, inc.service))
 
     event_done = {
         "type": "agent_step", "agent": "ingestor", "status": "done",
-        "message": f"Extracted {len(entities.get('error_codes',[]))} error codes · {len(raw_logs)} log lines parsed"
+        "message": f"Extracted {len(entities.get('error_codes', []))} error codes · {len(raw_logs)} log lines parsed",
     }
 
     return {
-        "entities": entities,
-        "raw_logs": raw_logs,
-        "log_timeline": entities.get("log_timeline", []),
+        "entities":      entities,
+        "raw_logs":      raw_logs,
+        "log_timeline":  entities.get("log_timeline", []),
         "ingestor_done": True,
-        "stream_events": [event_start, event_done],
+        "stream_events": prior_events + [event_start, event_done],  # ← accumulate
     }

@@ -18,24 +18,36 @@ Return ONLY valid JSON:
 }
 Rules: exactly 5 steps. All advisory — never auto-executed. BCP step must be step 1 if flagged."""
 
-_BCP_STEP = {"step":1,"action":"Immediately switch all affected payment terminals to standalone/offline mode to unblock customer checkout.","rationale":"Sev1 payment impact — business continuity. Customers must not be left unable to pay.","is_bcp":True}
+_BCP_STEP = {
+    "step": 1,
+    "action": "Immediately switch all affected payment terminals to standalone/offline mode to unblock customer checkout.",
+    "rationale": "Sev1 payment impact — business continuity. Customers must not be left unable to pay.",
+    "is_bcp": True,
+}
+
 
 def run_action_planner(state: AgentState) -> dict:
-    inc        = state["incident"]
-    root_cause = state.get("root_cause","Unknown")
-    top_causes = state.get("top_causes",[])
-    category   = state.get("probable_category","unknown")
-    confidence = state.get("confidence",0.5)
-    chunks     = state.get("runbook_chunks",[])
-    similar    = state.get("similar_incidents",[])
-    conflicts  = state.get("conflicts",[])
+    inc          = state["incident"]
+    root_cause   = state.get("root_cause", "Unknown")
+    top_causes   = state.get("top_causes", [])
+    category     = state.get("probable_category", "unknown")
+    confidence   = state.get("confidence", 0.5)
+    chunks       = state.get("runbook_chunks", [])
+    similar      = state.get("similar_incidents", [])
+    conflicts    = state.get("conflicts", [])
+    prior_events = state.get("stream_events", [])  # ← accumulate
 
-    event_start = {"type":"agent_step","agent":"action_planner","status":"running",
-                   "message":"Generating 5-step action plan..."}
+    # ── Include feedback context if retry ─────────────────────────────────────
+    feedback_context = state.get("feedback_context", "")
+    attempt_number   = state.get("attempt_number", 1)
 
-    force_bcp = (inc.severity == "Sev1" and
-                 any(kw in inc.symptoms.lower() for kw in ["payment","checkout","pos","basket"]))
+    event_start = {
+        "type": "agent_step", "agent": "action_planner", "status": "running",
+        "message": f"Generating 5-step action plan (attempt {attempt_number})...",
+    }
 
+    force_bcp   = (inc.severity == "Sev1" and
+                   any(kw in inc.symptoms.lower() for kw in ["payment", "checkout", "pos", "basket"]))
     runbook_ctx = "\n\n".join(f"[{c.filename}]\n{c.text[:800]}" for c in chunks)
     similar_ctx = "\n".join(f"- {s.id} resolved by: {s.resolution_code}" for s in similar)
     conflict_ctx = "\n".join(f"- {c.log_error_code}: {c.interpretation}" for c in conflicts) or "(none)"
@@ -43,8 +55,8 @@ def run_action_planner(state: AgentState) -> dict:
     prompt = f"""INCIDENT: {inc.service} / {inc.severity}
 Symptoms: {inc.symptoms}
 Root Cause: {root_cause}
-Category: {category} | Confidence: {round(confidence*100)}%
-Top Causes: {chr(10).join(f"{i+1}. {c}" for i,c in enumerate(top_causes))}
+Category: {category} | Confidence: {round(confidence * 100)}%
+Top Causes: {chr(10).join(f"{i+1}. {c}" for i, c in enumerate(top_causes))}
 Conflicts: {conflict_ctx}
 BCP REQUIRED: {"YES - step 1 MUST be BCP action" if force_bcp else "NO"}
 
@@ -53,7 +65,7 @@ RUNBOOKS:
 
 SIMILAR RESOLVED BY:
 {similar_ctx or "(none)"}
-
+{f"{chr(10)}{feedback_context}" if feedback_context else ""}
 Return JSON only."""
 
     try:
@@ -66,22 +78,21 @@ Return JSON only."""
                 temperature=0.2,
             )
         )
-        raw = resp.text.strip()
-        raw = re.sub(r"^```(?:json)?\s*", "", raw)
-        raw = re.sub(r"\s*```$", "", raw)
+        raw    = re.sub(r"^```(?:json)?\s*", "", resp.text.strip())
+        raw    = re.sub(r"\s*```$", "", raw)
         result = json.loads(raw)
     except Exception:
         result = {
             "action_plan": [
-                {"step":1,"action":"Check service health endpoint","rationale":"First diagnostic step","is_bcp":False},
-                {"step":2,"action":"Review recent error logs","rationale":"Identify root cause","is_bcp":False},
-                {"step":3,"action":"Follow runbook for identified pattern","rationale":"Standard procedure","is_bcp":False},
-                {"step":4,"action":"Notify relevant team if unresolved after 15 min","rationale":"Escalation threshold","is_bcp":False},
-                {"step":5,"action":"Document resolution and update ticket","rationale":"Audit trail","is_bcp":False},
+                {"step": 1, "action": "Check service health endpoint",              "rationale": "First diagnostic step",              "is_bcp": False},
+                {"step": 2, "action": "Review recent error logs",                    "rationale": "Identify root cause",                 "is_bcp": False},
+                {"step": 3, "action": "Follow runbook for identified pattern",       "rationale": "Standard procedure",                  "is_bcp": False},
+                {"step": 4, "action": "Notify relevant team if unresolved >15 min", "rationale": "Escalation threshold",                "is_bcp": False},
+                {"step": 5, "action": "Document resolution and update ticket",       "rationale": "Audit trail",                         "is_bcp": False},
             ],
             "escalation_path": "Escalate to Integration Support → Store Ops Manager if >15min unresolved.",
-            "handoff_note": f"Incident {inc.incident_id}: {category}. Root: {root_cause}.",
-            "incident_summary": f"Store system incident: {inc.symptoms}."
+            "handoff_note":    f"Incident {inc.incident_id}: {category}. Root: {root_cause}.",
+            "incident_summary": f"Store system incident: {inc.symptoms}.",
         }
 
     if force_bcp:
@@ -91,11 +102,16 @@ Return JSON only."""
         result["action_plan"] = plan
 
     return {
-        "action_plan": result.get("action_plan",[]),
-        "escalation_path": result.get("escalation_path",""),
-        "handoff_note": result.get("handoff_note",""),
+        "action_plan":      result.get("action_plan", []),
+        "escalation_path":  result.get("escalation_path", ""),
+        "handoff_note":     result.get("handoff_note", ""),
         "incident_summary": result.get("incident_summary", inc.symptoms),
-        "planner_done": True,
-        "stream_events": [event_start, {"type":"agent_step","agent":"action_planner","status":"done",
-                          "message":f"Plan ready — BCP enforced: {force_bcp}"}],
+        "planner_done":     True,
+        "stream_events":    prior_events + [               # ← accumulate
+            event_start,
+            {
+                "type": "agent_step", "agent": "action_planner", "status": "done",
+                "message": f"Plan ready — BCP enforced: {force_bcp}",
+            }
+        ],
     }

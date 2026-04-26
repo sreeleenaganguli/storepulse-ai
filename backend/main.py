@@ -1,12 +1,14 @@
 ﻿"""StorePulse AI — FastAPI application entry point."""
-import json, asyncio, logging
+import json, asyncio, logging, base64
 from datetime import datetime, timezone
 from typing import AsyncGenerator, Optional
+
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel
+
 
 from config import MOCK_MODE, AUDIT_FILE, DATA_DIR
 from models.schemas import IncidentInput, ConfirmRequest, TriageOutput
@@ -18,14 +20,17 @@ from rag.feedback_loop import save_feedback, build_feedback_context
 from rag.embedder import cache_stats as embed_cache_stats
 from rag.response_cache import cache_stats as response_cache_stats
 
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("storepulse")
+
 
 app = FastAPI(
     title="StorePulse AI",
     description="AI-Assisted Incident Triage Copilot for Store Systems",
     version="1.0.0"
 )
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -61,6 +66,67 @@ def _audit(record: dict):
         f.write(json.dumps({**record, "ts": datetime.now(timezone.utc).isoformat()}) + "\n")
 
 
+# ── Base64 file decoder — merges uploaded files into log_snippet ───────────────
+def _decode_uploaded_files(incident: IncidentInput) -> IncidentInput:
+    file_refs = incident.log_file_reference or []
+    if not file_refs:
+        return incident
+
+    _LOG_EXTENSIONS  = {".log", ".txt", ".out", ".err"}
+    _SKIP_EXTENSIONS = {".md"}          # seed/data files
+    _MAX_BYTES       = 50_000                               # ~50KB cap
+
+    decoded_parts = []
+    for file_obj in file_refs:
+        name    = (file_obj.get("name", "") or "").lower()
+        content = file_obj.get("content", "")
+        size    = file_obj.get("size", 0) or 0
+
+        # Guard 1 — skip JSON/JSONL/Markdown (these are seed data, not logs)
+        if any(name.endswith(ext) for ext in _SKIP_EXTENSIONS):
+            log.info(f"[FileIngest] Skipping seed/data file: {name}")
+            continue
+
+        # Guard 2 — skip files too large to be a real incident log
+        if size > _MAX_BYTES:
+            log.warning(f"[FileIngest] Skipping oversized file: {name} ({size} bytes)")
+            continue
+
+        if not content:
+            log.warning(f"[FileIngest] {name} — empty content, skipping")
+            continue
+
+        try:
+            raw_bytes = base64.b64decode(content)
+
+            # Guard 3 — hard size check on decoded bytes
+            if len(raw_bytes) > _MAX_BYTES:
+                log.warning(f"[FileIngest] Decoded content too large: {name}")
+                continue
+
+            file_text = raw_bytes.decode("utf-8", errors="replace").strip()
+
+            # Guard 4 — skip if decoded content is JSON structure
+            if file_text.startswith(("{", "[")):
+                log.info(f"[FileIngest] Skipping JSON-structured file: {name}")
+                continue
+
+            decoded_parts.append(f"# File: {name}\n{file_text}")
+            log.info(f"[FileIngest] Decoded {name} — {len(file_text)} chars, "
+                     f"{file_text.count(chr(10))+1} lines")
+        except Exception as e:
+            log.warning(f"[FileIngest] Failed to decode {name}: {e}")
+
+    if not decoded_parts:
+        return incident
+
+    merged   = "\n\n".join(decoded_parts)
+    existing = (incident.log_snippet or "").strip()
+    combined = f"{existing}\n\n{merged}".strip() if existing else merged
+
+    return incident.model_copy(update={"log_snippet": combined})
+
+
 # ── Fallback triage output ─────────────────────────────────────────────────────
 def _fallback_output(incident: IncidentInput, error: str, attempt: int, feedback_context: str) -> TriageOutput:
     return TriageOutput(
@@ -72,9 +138,9 @@ def _fallback_output(incident: IncidentInput, error: str, attempt: int, feedback
         conflicts=[],
         action_plan=[{
             "step": 1,
-            "title": "Manual Triage Required",
-            "description": "Automated analysis failed. Please review logs and runbooks manually.",
-            "priority": "high",
+            "action": "Manual triage required — automated analysis failed.",
+            "rationale": "Graph execution failed. Review logs and runbooks manually.",
+            "is_bcp": False,
         }],
         escalation_path="Escalate to on-call engineer for manual triage.",
         handoff_note=f"Automated triage failed on attempt {attempt}. Error: {error}. Feedback: {feedback_context or 'None'}",
@@ -105,12 +171,16 @@ async def _stream_triage(
         "attempt":     attempt_number,
     })
 
+    # ── Step 1: Redact PII from all text fields ────────────────────────────────
     redacted_fields = redact_incident(incident.model_dump())
     incident_clean  = incident.model_copy(update={
         k: redacted_fields[k]
         for k in redacted_fields
         if hasattr(incident, k)
     })
+
+    # ── Step 2: Decode uploaded base64 files → merge into log_snippet ─────────
+    incident_clean = _decode_uploaded_files(incident_clean)
 
     if MOCK_MODE:
         from mock.responses import get_mock_events
@@ -133,22 +203,22 @@ async def _stream_triage(
         await asyncio.sleep(0.05)
 
     initial_state: AgentState = {
-        "incident":           incident_clean,
-        "entities":           {}, "log_timeline": [], "severity_path": "standard",
-        "ingestor_done":      False,
-        "runbook_chunks":     [], "similar_incidents": [], "raw_logs": [],
+        "incident":            incident_clean,   # ← log_snippet now has decoded file text
+        "entities":            {}, "log_timeline": [], "severity_path": "standard",
+        "ingestor_done":       False,
+        "runbook_chunks":      [], "similar_incidents": [], "raw_logs": [],
         "retrieval_max_score": 0.0, "retrieval_attempts": 0,
-        "researcher_done":    False,
-        "conflicts":          [], "root_cause": "", "probable_category": "unknown",
-        "top_causes":         [], "confidence": 0.0, "confidence_rationale": "",
-        "reasoning_trace":    "", "needs_reretrieval": False, "reretrieval_query": "",
-        "diagnostician_done": False,
-        "action_plan":        [], "escalation_path": "", "handoff_note": "",
-        "incident_summary":   "", "planner_done": False,
-        "validation_passed":  False, "validation_notes": [],
-        "stream_events":      [],
-        "feedback_context":   feedback_context,
-        "attempt_number":     attempt_number,
+        "researcher_done":     False,
+        "conflicts":           [], "root_cause": "", "probable_category": "unknown",
+        "top_causes":          [], "confidence": 0.0, "confidence_rationale": "",
+        "reasoning_trace":     "", "needs_reretrieval": False, "reretrieval_query": "",
+        "diagnostician_done":  False,
+        "action_plan":         [], "escalation_path": "", "handoff_note": "",
+        "incident_summary":    "", "planner_done": False,
+        "validation_passed":   False, "validation_notes": [],
+        "stream_events":       [],
+        "feedback_context":    feedback_context,
+        "attempt_number":      attempt_number,
     }
 
     sent_event_count = 0
@@ -205,11 +275,11 @@ async def _stream_triage(
         }
         yield {"event": "final_result", "data": json.dumps(final_evt)}
         _audit({
-            "event":            "triage_complete",
-            "incident_id":      incident.incident_id,
-            "attempt":          attempt_number,
-            "category":         output.probable_category,
-            "confidence":       output.confidence,
+            "event":             "triage_complete",
+            "incident_id":       incident.incident_id,
+            "attempt":           attempt_number,
+            "category":          output.probable_category,
+            "confidence":        output.confidence,
             "validation_passed": output.validation_passed,
         })
 
@@ -245,13 +315,12 @@ async def health():
         "incidents": len(_raw_incidents),
         "version":   "1.0.0",
         "cache":     {
-            **embed_cache_stats(),       # embed_cache_entries, embed_cache_file
-            **response_cache_stats(),    # response_cache_entries, response_cache_file
+            **embed_cache_stats(),
+            **response_cache_stats(),
         },
     }
 
 
-# ── Metrics endpoint ───────────────────────────────────────────────────────────
 @app.get("/metrics")
 async def metrics():
     from pathlib import Path
@@ -291,8 +360,8 @@ async def metrics():
             "category_breakdown":   category_breakdown,
         },
         "cache": {
-            **rc_stats(),   # response_cache_entries, response_cache_file
-            **ec_stats(),   # embed_cache_entries, embed_cache_file
+            **rc_stats(),
+            **ec_stats(),
         },
         "system": {
             "mock_mode": MOCK_MODE,

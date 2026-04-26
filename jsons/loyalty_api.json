@@ -1,0 +1,20 @@
+{
+  "incident": {
+    "id": "INC-LOYALTY-API-UNAVAILABLE-20241121-0055",
+    "service": "loyalty-api",
+    "severity": "Sev2",
+    "symptoms": "Loyalty points not applying at checkout; circuit breaker tripped; SCO showing 'Loyalty unavailable' banner across all lanes",
+    "timestamps": {
+      "created": "2024-11-21T11:30:00Z",
+      "resolved": "2024-11-21T12:15:00Z"
+    },
+    "resolution_code": "LOYALTY_CACHE_FALLBACK_ENABLED"
+  },
+  "logs": [
+    {"time":"2024-11-21T11:28:44Z","service":"sco-ui","level":"WARN","message":"Circuit breaker OPEN for loyalty-api after 5 consecutive failures","error_code":"CIRCUIT_OPEN"},
+    {"time":"2024-11-21T11:29:10Z","service":"sco-ui","level":"ERROR","message":"loyalty-api health endpoint /health returned 503 for 120s","error_code":"CIRCUIT_OPEN"},
+    {"time":"2024-11-21T11:30:05Z","service":"sco-ui","level":"ERROR","message":"LOYALTY_TIMEOUT: response exceeded 5000ms SLA for customer CUS12345","error_code":"LOYALTY_API_503"},
+    {"time":"2024-11-21T11:31:22Z","service":"sco-ui","level":"ERROR","message":"loyalty-api: HTTP 503 Service Unavailable on /v2/member/lookup","error_code":"LOYALTY_API_503"},
+    {"time":"2024-11-21T11:32:40Z","service":"sco-ui","level":"WARN","message":"Falling back to offline loyalty cache; API unreachable","error_code":"LOYALTY_TIMEOUT"}
+  ]
+}

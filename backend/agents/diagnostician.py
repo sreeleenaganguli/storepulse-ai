@@ -1,6 +1,6 @@
 """Diagnostician Agent — new google.genai SDK."""
 from __future__ import annotations
-import json, re
+import json, re, traceback
 from google import genai
 from google.genai import types
 from config import GEMINI_API_KEY, MODEL_DIAGNOSTICIAN, MODEL_DIAG_FALLBACK
@@ -8,8 +8,12 @@ from config import ERROR_TAXONOMY, PATTERN_MAP
 from state import AgentState
 from models.schemas import ConflictItem
 from rag.response_cache import get_cached, set_cached
+import logging
+
+log = logging.getLogger("storepulse")
 
 _client = genai.Client(api_key=GEMINI_API_KEY)
+
 
 _SYSTEM = """You are a senior SRE specialising in retail store systems. Do diagnostic root-cause analysis.
 
@@ -35,6 +39,61 @@ Return ONLY valid JSON (no markdown):
 CONFLICT RULE: error code in logs not in known taxonomy = conflict. Set needs_reretrieval=true on conflict."""
 
 
+# ── Expanded PATTERN_MAP — covers LLM-extracted variants not just raw codes ───
+_EXTENDED_PATTERN_MAP = {
+    # Payment timeout — all variants the LLM might extract
+    "GW_TIMEOUT_503":          "payment_timeout",
+    "GW_CONNECT_REFUSED":      "payment_timeout",
+    "PAYMENT_SVC_UNAVAILABLE": "payment_timeout",
+    "GATEWAY_TIMEOUT":         "payment_timeout",
+    "PAYMENT_TIMEOUT":         "payment_timeout",
+    "GW_TIMEOUT":              "payment_timeout",
+    "TIMEOUT_503":             "payment_timeout",
+    "CONNECTION_TIMEOUT":      "payment_timeout",
+    "GATEWAY_CONNECTION":      "payment_timeout",
+
+    # Receipt printer
+    "PRINTER_OFFLINE_ERR":     "receipt_printer_failure",
+    "CUPS_QUEUE_BLOCKED":      "receipt_printer_failure",
+    "PRINTER_OFFLINE":         "receipt_printer_failure",
+    "CUPS_BLOCKED":            "receipt_printer_failure",
+    "RECEIPT_FAILED":          "receipt_printer_failure",
+
+    # Barcode scanner
+    "SCANNER_DISCONNECT":      "barcode_scanner_issue",
+    "BARCODE_READ_FAIL":       "barcode_scanner_issue",
+    "SCANNER_OFFLINE":         "barcode_scanner_issue",
+
+    # Loyalty API
+    "LOYALTY_API_TIMEOUT":     "loyalty_api_unavailable",
+    "LOYALTY_SVC_DOWN":        "loyalty_api_unavailable",
+    "LOYALTY_UNAVAILABLE":     "loyalty_api_unavailable",
+
+    # Promo engine
+    "PROMO_LATENCY_HIGH":      "promotion_engine_latency",
+    "PROMO_SVC_SLOW":          "promotion_engine_latency",
+    "PROMO_TIMEOUT":           "promotion_engine_latency",
+
+    # Network
+    "NET_LINK_FLAP":           "store_network_flap",
+    "PACKET_LOSS_HIGH":        "store_network_flap",
+    "NET_FLAP":                "store_network_flap",
+    "NETWORK_FLAP":            "store_network_flap",
+}
+
+# Merge config PATTERN_MAP with extended map (config takes priority)
+_FULL_PATTERN_MAP = {**_EXTENDED_PATTERN_MAP, **PATTERN_MAP}
+
+
+def _resolve_pattern(extracted_codes: list) -> str:
+    """Try each extracted code against the full pattern map, return first match."""
+    for code in extracted_codes:
+        hit = _FULL_PATTERN_MAP.get(code)
+        if hit:
+            return hit
+    return "unknown"
+
+
 def _call(model_name: str, prompt: str) -> str:
     resp = _client.models.generate_content(
         model=model_name,
@@ -43,6 +102,9 @@ def _call(model_name: str, prompt: str) -> str:
             system_instruction=_SYSTEM,
             response_mime_type="application/json",
             temperature=0.1,
+            # FIX: disable thinking tokens — they conflict with response_mime_type=application/json
+            # on gemini-2.5-flash, thinking output breaks JSON-only mode causing parse failure
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
         )
     )
     return resp.text
@@ -71,15 +133,15 @@ def run_diagnostician(state: AgentState) -> dict:
 
     known_codes     = ERROR_TAXONOMY.get(inc.service, [])
     extracted_codes = entities.get("error_codes", [])
-    pattern_hint    = PATTERN_MAP.get(extracted_codes[0], "unknown") if extracted_codes else "unknown"
+    pattern_hint    = _resolve_pattern(extracted_codes)   # uses full map now
     top_runbook     = chunks[0].filename if chunks else "none"
     top_score       = f"{chunks[0].combined_score:.0%}" if chunks else "0%"
 
-    # ── Response cache check — only on first attempt (retries must hit LLM) ────
+    # ── Response cache check — only on first attempt ───────────────────────────
     if attempt_number == 1:
         cached = get_cached(inc.service, inc.symptoms, extracted_codes)
         if cached:
-            print(f"[ResponseCache] ⚡ Cache hit for {inc.service}")
+            log.info(f"[ResponseCache] Cache hit for {inc.service}")
             cached_conflicts = [
                 ConflictItem(**c) if isinstance(c, dict) else c
                 for c in cached.get("conflicts", [])
@@ -93,7 +155,7 @@ def run_diagnostician(state: AgentState) -> dict:
                     {
                         "type": "agent_step", "agent": "diagnostician", "status": "done",
                         "message": (
-                            f"⚡ Cache hit — "
+                            f"Cache hit — "
                             f"Confidence {round(cached.get('confidence', 0) * 100)}% | "
                             f"Category: {cached.get('probable_category', 'unknown')}"
                         ),
@@ -101,7 +163,7 @@ def run_diagnostician(state: AgentState) -> dict:
                 ],
             }
 
-    # ── Build prompt (stable context first, variable incident last) ────────────
+    # ── Build prompt ───────────────────────────────────────────────────────────
     runbook_ctx = "\n\n".join(f"[{c.filename}]\n{c.text[:600]}" for c in chunks)
     similar_ctx = "\n".join(
         f"- {s.id} {s.service}: {s.symptoms[:80]} → {s.resolution_code}"
@@ -109,7 +171,7 @@ def run_diagnostician(state: AgentState) -> dict:
     )
     log_ctx = "\n".join(
         f"{l.get('time','')} [{l.get('level','')}] {l.get('message','')} [{l.get('error_code','')}]"
-        for l in state.get("raw_logs", [])[:10]
+        for l in state.get("raw_logs", [])
     )
 
     prompt = f"""RUNBOOKS (stable reference):
@@ -131,23 +193,25 @@ LOGS:
 {f"{chr(10)}{feedback_context}" if feedback_context else ""}
 Return JSON only."""
 
-    # ── LLM call with fallback chain ───────────────────────────────────────────
+    # ── LLM call — both models have thinking disabled ─────────────────────────
     result     = None
     used_model = MODEL_DIAGNOSTICIAN
-    # agents/diagnostician.py — inside the for loop
+
     for model_name in [MODEL_DIAGNOSTICIAN, MODEL_DIAG_FALLBACK]:
         try:
             result     = _parse(_call(model_name, prompt))
             used_model = model_name
+            log.info(f"[Diagnostician] LLM success with {model_name}")
             break
         except Exception as e:
-            print(f"[Diagnostician] Model {model_name} failed: {e}")   # ← ADD THIS
+            log.error(f"[Diagnostician] Model {model_name} failed: {type(e).__name__}: {e}")
+            log.error(traceback.format_exc())
             continue
 
-
-    # ── Rule-based fallback when all LLM calls fail ───────────────────────────
+    # ── Rule-based fallback ────────────────────────────────────────────────────
     if result is None:
-        inferred = PATTERN_MAP.get(extracted_codes[0], "unknown") if extracted_codes else "unknown"
+        inferred = _resolve_pattern(extracted_codes)   # uses full map
+
         if extracted_codes and inferred != "unknown" and chunks:
             fallback_confidence = 0.65
         elif extracted_codes and inferred != "unknown":
@@ -159,7 +223,10 @@ Return JSON only."""
             "conflicts":            [],
             "root_cause":           f"Rule-based: {inferred}",
             "probable_category":    inferred,
-            "top_causes":           [f"Pattern match: {inferred}", "LLM unavailable — rule-based fallback"],
+            "top_causes":           [
+                f"Pattern match: {inferred}",
+                "LLM unavailable — rule-based fallback",
+            ],
             "confidence":           fallback_confidence,
             "confidence_rationale": (
                 f"Fallback: error code '{extracted_codes[0] if extracted_codes else 'none'}' "
@@ -180,20 +247,19 @@ Return JSON only."""
 
     conflicts = [ConflictItem(**c) for c in result.get("conflicts", [])]
 
-    # ── Persist to response cache (only successful LLM calls, first attempt) ───
-    if used_model != MODEL_DIAGNOSTICIAN or result.get("probable_category") != "unknown":
-        if attempt_number == 1:
-            set_cached(inc.service, inc.symptoms, extracted_codes, {
-                "conflicts":            [c.__dict__ for c in conflicts],
-                "root_cause":           result.get("root_cause", ""),
-                "probable_category":    result.get("probable_category", "unknown"),
-                "top_causes":           result.get("top_causes", []),
-                "confidence":           float(result.get("confidence", 0.5)),
-                "confidence_rationale": result.get("confidence_rationale", ""),
-                "reasoning_trace":      result.get("reasoning_trace", ""),
-                "needs_reretrieval":    False,
-                "reretrieval_query":    "",
-            })
+    # ── Cache only good LLM results ────────────────────────────────────────────
+    if result.get("probable_category") != "unknown" and attempt_number == 1:
+        set_cached(inc.service, inc.symptoms, extracted_codes, {
+            "conflicts":            [c.__dict__ for c in conflicts],
+            "root_cause":           result.get("root_cause", ""),
+            "probable_category":    result.get("probable_category", "unknown"),
+            "top_causes":           result.get("top_causes", []),
+            "confidence":           float(result.get("confidence", 0.5)),
+            "confidence_rationale": result.get("confidence_rationale", ""),
+            "reasoning_trace":      result.get("reasoning_trace", ""),
+            "needs_reretrieval":    False,
+            "reretrieval_query":    "",
+        })
 
     new_events = [
         event_start,

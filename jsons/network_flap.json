@@ -1,0 +1,20 @@
+{
+  "incident": {
+    "id": "INC-STORE-NETWORK-FLAP-20241125-0078",
+    "service": "store-network",
+    "severity": "Sev1",
+    "symptoms": "Store uplink to DC flapping; BGP session dropping; 40%+ packet loss; all SCO, POS and colleague-assisted terminals intermittently losing connectivity",
+    "timestamps": {
+      "created": "2024-11-25T20:15:00Z",
+      "resolved": "2024-11-25T21:02:00Z"
+    },
+    "resolution_code": "SWITCH_PORT_REPLACED"
+  },
+  "logs": [
+    {"time":"2024-11-25T20:13:05Z","service":"store-network","level":"ERROR","message":"BGP session with store router dropped; reconvergence in progress","error_code":"NET_LINK_FLAP"},
+    {"time":"2024-11-25T20:13:44Z","service":"store-network","level":"ERROR","message":"SWITCH_PORT_DOWN: port 22 on core-sw-01 lost carrier","error_code":"SWITCH_PORT_DOWN"},
+    {"time":"2024-11-25T20:14:20Z","service":"store-network","level":"ERROR","message":"PACKET_LOSS_HIGH: 45% packet loss on store uplink to DC","error_code":"PACKET_LOSS_HIGH"},
+    {"time":"2024-11-25T20:15:02Z","service":"store-network","level":"WARN","message":"NET_LINK_FLAP: interface eth0 went down/up 7 times in 60s","error_code":"NET_LINK_FLAP"},
+    {"time":"2024-11-25T20:16:30Z","service":"store-network","level":"ERROR","message":"store-network: ARP timeout for gateway 10.41.1.1","error_code":"NET_LINK_FLAP"}
+  ]
+}

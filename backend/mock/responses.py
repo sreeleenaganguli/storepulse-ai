@@ -1,6 +1,5 @@
-"""Pre-saved golden responses for offline demo (MOCK_MODE=true)."""
-import time
-from models.schemas import (TriageOutput, ActionStep, RetrievedChunk,
+# mock/responses.py
+from models.schemas import (TriageOutput, ActionStep, RunbookChunk,     # ← RunbookChunk
                              SimilarIncident, ConflictItem)
 
 _PAYMENT_TIMEOUT = TriageOutput(
@@ -26,7 +25,10 @@ _PAYMENT_TIMEOUT = TriageOutput(
         ActionStep(step=5, action="Escalate to L2 Integration Support if fallback processor also fails or gateway unreachable for >15 minutes. Use template: 'Sev1 GW_TIMEOUT_503 on {store_id}, {affected_units} terminals, fallback tested: {result}'.", rationale="L2 has gateway configuration access and can perform emergency routing changes.", is_bcp=False, requires_confirm=True),
     ],
     escalation_path="L1 Store Support (immediate) → L2 Integration Support at +15min if fallback fails → L3 Platform Engineering + Payment Provider TAM at +30min if gateway confirms outage",
-    handoff_note="INC OPEN: GW_TIMEOUT_503 on 18 SCO units. Cash-only mode activated.
+    handoff_note=(
+    "INC OPEN: GW_TIMEOUT_503 on 18 SCO units. Cash-only mode activated.\n"
+    "DONE: Fallback processor tested — also failing.\n"
+    "PENDING: L2 Integration Support investigating network path to gateway."),
 DONE: Fallback processor tested — also failing. Gateway unreachable from store network.
 PENDING: L2 Integration Support investigating network path to gateway.",
     confidence=0.91,

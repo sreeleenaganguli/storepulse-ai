@@ -20,7 +20,11 @@ def run_researcher(state: AgentState) -> dict:
     if requery:
         query = requery
     else:
-        error_codes = " ".join(entities.get("error_codes", []))
+        all_codes    = entities.get("error_codes", [])
+        primary      = entities.get("primary_error_code", "")
+        top_codes    = [c for c in all_codes if c != primary][:3]   # max 3 supporting codes
+        error_codes  = " ".join([primary] + top_codes) if primary else " ".join(top_codes)
+
         keywords    = " ".join(entities.get("keywords", [])[:5])
         query = f"{inc.service} {inc.symptoms[:120]} {error_codes} {keywords}".strip()
 

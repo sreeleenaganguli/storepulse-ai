@@ -37,6 +37,7 @@ class IncidentInput(BaseModel):
     symptoms: str
     created: Optional[str] = ""
     log_snippet: Optional[str] = ""
+    log_file_reference:  Optional[List[Dict[str, Any]]] = []
 
 class TriageOutput(BaseModel):
     incident_id: Optional[str] = ""
@@ -56,6 +57,8 @@ class TriageOutput(BaseModel):
     raw_logs: List[Dict[str, Any]] = []
     validation_passed: bool = True
     validation_failures: List[str] = []
+    entities: Dict[str, Any] = {}         
+    validation_notes: List[str] = [] 
 
 class ConfirmRequest(BaseModel):
     incident_id: str

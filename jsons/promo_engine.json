@@ -1,0 +1,20 @@
+{
+  "incident": {
+    "id": "INC-PROMOTION-ENGINE-LATENCY-20241122-0063",
+    "service": "promo-engine",
+    "severity": "Sev2",
+    "symptoms": "Checkout basket evaluation stalling for 8–15 seconds; promo-engine CPU pegged at 98%; customers seeing no discounts applied",
+    "timestamps": {
+      "created": "2024-11-22T16:00:00Z",
+      "resolved": "2024-11-22T16:50:00Z"
+    },
+    "resolution_code": "PROMO_ENGINE_RESTARTED_RULE_CACHE_CLEARED"
+  },
+  "logs": [
+    {"time":"2024-11-22T15:58:30Z","service":"promo-engine","level":"ERROR","message":"promo-engine CPU at 98%; request queue depth 174","error_code":"PROMO_ENGINE_CPU_HIGH"},
+    {"time":"2024-11-22T15:59:05Z","service":"promo-engine","level":"ERROR","message":"PROMO_TIMEOUT: promotion rule RULE-441 exceeded 3000ms evaluation limit","error_code":"PROMO_TIMEOUT"},
+    {"time":"2024-11-22T15:59:48Z","service":"promo-engine","level":"ERROR","message":"promo-engine: basket evaluation timeout after 8000ms for basket BSKT77712","error_code":"BASKET_EVAL_TIMEOUT"},
+    {"time":"2024-11-22T16:00:22Z","service":"basket-service","level":"WARN","message":"basket-service: promo-engine unresponsive; returning no-discount response","error_code":"PROMO_ENGINE_CPU_HIGH"},
+    {"time":"2024-11-22T16:01:10Z","service":"promo-engine","level":"WARN","message":"Slow rule engine detected: 5 promotion rules evaluated in 12340ms","error_code":"BASKET_EVAL_TIMEOUT"}
+  ]
+}

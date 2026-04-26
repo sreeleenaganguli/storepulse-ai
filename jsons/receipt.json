@@ -1,0 +1,20 @@
+{
+  "incident": {
+    "id": "INC-RECEIPT-PRINTER-20241118-0031",
+    "service": "receipt-service",
+    "severity": "Sev3",
+    "symptoms": "Receipt printer offline on lanes 4 and 7; CUPS queue blocked; customers not receiving receipts",
+    "timestamps": {
+      "created": "2024-11-18T09:10:00Z",
+      "resolved": "2024-11-18T09:45:00Z"
+    },
+    "resolution_code": "PRINTER_PAPER_JAM_CLEARED"
+  },
+  "logs": [
+    {"time":"2024-11-18T09:08:55Z","service":"receipt-service","level":"ERROR","message":"CUPS_QUEUE_BLOCKED: print job queue depth 47 on lane 4 printer","error_code":"CUPS_QUEUE_BLOCKED"},
+    {"time":"2024-11-18T09:09:12Z","service":"receipt-service","level":"ERROR","message":"PRINTER_OFFLINE_ERR: receipt printer PRN-004 not responding on USB","error_code":"PRINTER_OFFLINE_ERR"},
+    {"time":"2024-11-18T09:10:33Z","service":"receipt-service","level":"WARN","message":"receipt-service: print job JOB-8821 timed out after 15s; retry 2/3","error_code":"RECEIPT_SVC_TIMEOUT"},
+    {"time":"2024-11-18T09:11:45Z","service":"receipt-service","level":"ERROR","message":"CUPS_QUEUE_BLOCKED: print job queue depth 89 on lane 7 printer","error_code":"CUPS_QUEUE_BLOCKED"},
+    {"time":"2024-11-18T09:12:01Z","service":"receipt-service","level":"ERROR","message":"PRINTER_OFFLINE_ERR: receipt printer PRN-007 not responding on USB","error_code":"PRINTER_OFFLINE_ERR"}
+  ]
+}

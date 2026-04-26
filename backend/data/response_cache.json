@@ -41,5 +41,433 @@
     "reasoning_trace": "1) Error codes 'GW_TIMEOUT_503' and 'PAYMENT_SVC_UNAVAILABLE' were found in the logs and incident description. 2) Both error codes are present in the 'Known taxonomy for pos-payment'. No conflicts detected. 3) The 'GW_TIMEOUT_503' error code and the symptoms ('Payment retries failing on 18 SCO units', 'customers unable to complete basket', 'GW_TIMEOUT_503 flooding logs') directly match the 'payment_timeout.md' runbook's symptoms and error codes. The 'PAYMENT_SVC_UNAVAILABLE' and 'Circuit breaker OPEN' messages further support a payment gateway issue. The 'Top runbook match: payment_timeout.md (combined score: 67%)' confirms this. 4) Conclusion is a payment gateway timeout issue, with potential causes listed from the runbook.",
     "needs_reretrieval": false,
     "reretrieval_query": ""
+  },
+  "a8460adeb7a83dac": {
+    "conflicts": [],
+    "root_cause": "The payment gateway is experiencing timeouts, leading to payment retries failing and the payment service becoming unavailable, likely due to an upstream service degradation or network connectivity issue.",
+    "probable_category": "payment_timeout",
+    "top_causes": [
+      "Upstream payment gateway service degradation or maintenance",
+      "Network connectivity loss between store and payment gateway",
+      "Payment gateway certificate expiry causing TLS handshake failure"
+    ],
+    "confidence": 0.67,
+    "confidence_rationale": "The error code 'GW_TIMEOUT_503' is explicitly listed in the 'payment_timeout.md' runbook and is present in the logs. 'PAYMENT_SVC_UNAVAILABLE' is also in the known taxonomy and is a direct symptom of payment gateway issues. The incident symptoms (payment retries failing, customers unable to complete basket, multiple SCO units affected) align perfectly with the 'payment_timeout' pattern. The provided 'combined score: 67%' falls within the 0.60-0.79 range for a runbook match that is not 'strong' (which would be 0.80-0.95).",
+    "reasoning_trace": "1) Error codes 'GW_TIMEOUT_503' and 'PAYMENT_SVC_UNAVAILABLE' were found in the logs and incident description. 2) Both error codes are present in the 'Known taxonomy for pos-payment'. No conflicts detected. 3) The 'GW_TIMEOUT_503' error code and the symptoms ('Payment retries failing on 18 SCO units', 'customers unable to complete basket', 'GW_TIMEOUT_503 flooding logs') directly match the 'payment_timeout.md' runbook's symptoms and error codes. The 'PAYMENT_SVC_UNAVAILABLE' and 'Circuit breaker OPEN' messages further support a payment gateway issue. The 'Top runbook match: payment_timeout.md (combined score: 67%)' confirms this. 4) Conclusion is a payment gateway timeout issue, with potential causes listed from the runbook.",
+    "needs_reretrieval": false,
+    "reretrieval_query": ""
+  },
+  "d3147f02987daa7e": {
+    "conflicts": [
+      {
+        "log_error_code": "GATEWAY_TIMEOUT",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The log error code 'GATEWAY_TIMEOUT' is not an exact match for the expected error codes in the 'payment_timeout' runbook, indicating a potential conflict in the error code taxonomy."
+      }
+    ],
+    "root_cause": "The payment gateway connection timed out, leading to payment failures on multiple SCO units.",
+    "probable_category": "payment_timeout",
+    "top_causes": [
+      "Upstream payment gateway service degradation or maintenance",
+      "Network connectivity loss between store and payment gateway",
+      "Payment gateway certificate expiry causing TLS handshake failure"
+    ],
+    "confidence": 0.65,
+    "confidence_rationale": "The error code 'GATEWAY_TIMEOUT' is not in the known taxonomy for 'pos-payment' and does not exactly match the runbook patterns 'GW_TIMEOUT_503' or 'GW_CONNECT_REFUSED'. However, the symptom 'Gateway timeout on 18 SCO units' strongly aligns with the 'payment_timeout' runbook, and the log message 'Gateway connection timed out' directly supports this. The confidence is moderate due to the error code conflict, but the strong symptomatic match prevents a lower score.",
+    "reasoning_trace": "1) The error code 'GATEWAY_TIMEOUT' was found in the logs. 2) This error code is NOT in the known taxonomy for 'pos-payment' (which expects 'GW_TIMEOUT_503', 'GW_CONNECT_REFUSED', 'PAYMENT_SVC_UNAVAILABLE'). This indicates a conflict. 3) Despite the conflict, the symptom 'Gateway timeout on 18 SCO units' and the log message 'Gateway connection timed out' strongly match the 'payment_timeout' runbook's symptoms ('Repeated GW_TIMEOUT_503 or GW_CONNECT_REFUSED in pos-payment or payment-gateway logs', 'Customer basket stuck at payment confirmation screen', 'Multiple checkout lanes affected simultaneously'). The pattern map also suggests 'payment_timeout'. 4) Conclusion: The root cause is a payment gateway timeout, but the specific error code 'GATEWAY_TIMEOUT' needs to be added to the taxonomy or mapped to an existing one.",
+    "needs_reretrieval": false,
+    "reretrieval_query": ""
+  },
+  "d4ac45c93a1bebd5": {
+    "conflicts": [
+      {
+        "log_error_code": "PAYMENT_SVC_UNAVAILABLE",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'PAYMENT_SVC_UNAVAILABLE' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "CIRCUIT_OPEN",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'CIRCUIT_OPEN' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "PROMOTION",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'PROMOTION' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "NETWORK_SWITCH_FAILOVER",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'NETWORK_SWITCH_FAILOVER' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "NETWORK",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'NETWORK' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "SCAN_DECODE_ERROR",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'SCAN_DECODE_ERROR' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "CACHE_FALLBACK_ENABLED",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'CACHE_FALLBACK_ENABLED' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "PRINTER_QUEUE_FLUSH",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'PRINTER_QUEUE_FLUSH' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "LOYALTY_API_FAILOVER",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'LOYALTY_API_FAILOVER' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "RECEIPT_SVC_TIMEOUT",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'RECEIPT_SVC_TIMEOUT' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "BASKET_EVAL_TIMEOUT",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'BASKET_EVAL_TIMEOUT' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "CUPS_SERVICE_RESTART",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'CUPS_SERVICE_RESTART' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "PROMOTION_CACHE_REBUILD",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'PROMOTION_CACHE_REBUILD' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "FIRMWARE_RESET",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'FIRMWARE_RESET' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "PROMO",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'PROMO' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "GW_FAILOVER_ACTIVATED",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'GW_FAILOVER_ACTIVATED' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "CUPS_QUEUE_BLOCKED",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'CUPS_QUEUE_BLOCKED' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "STORE",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'STORE' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "PACKET_LOSS_HIGH",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'PACKET_LOSS_HIGH' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "HARDWARE_PAPER_JAM",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'HARDWARE_PAPER_JAM' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "LOYALTY_TIMEOUT",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'LOYALTY_TIMEOUT' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "PAYMENT_TIMEOUT_GATEWAY",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'PAYMENT_TIMEOUT_GATEWAY' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "BARCODE",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'BARCODE' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "LOYALTY",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'LOYALTY' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "PRINTER_OFFLINE_ERR",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'PRINTER_OFFLINE_ERR' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "CIRCUIT_BREAKER_RESET",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'CIRCUIT_BREAKER_RESET' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "NET_LINK_FLAP",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'NET_LINK_FLAP' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "SCAN_SERVICE_RESTART",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'SCAN_SERVICE_RESTART' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "USB_ENUM_FAILURE",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'USB_ENUM_FAILURE' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "PROMO_RULE_ROLLBACK",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'PROMO_RULE_ROLLBACK' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "VLAN_RECONFIGURED",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'VLAN_RECONFIGURED' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "LOYALTY_API_503",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'LOYALTY_API_503' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "CLOSED",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'CLOSED' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "SCANNER_USB_REENUMERATE",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'SCANNER_USB_REENUMERATE' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "ISP_LINE_RESTORED",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'ISP_LINE_RESTORED' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "SCAN_DEVICE_LOST",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'SCAN_DEVICE_LOST' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "SWITCH_PORT_DOWN",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'SWITCH_PORT_DOWN' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "PAYMENT",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'PAYMENT' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "RECEIPT",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'RECEIPT' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "GATEWAY_MAINTENANCE",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'GATEWAY_MAINTENANCE' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "PROMO_ENGINE_CPU_HIGH",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'PROMO_ENGINE_CPU_HIGH' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "PROMO_ENGINE_RESTART",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'PROMO_ENGINE_RESTART' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      },
+      {
+        "log_error_code": "PROMO_TIMEOUT",
+        "runbook_expects": [
+          "GW_TIMEOUT_503",
+          "GW_CONNECT_REFUSED"
+        ],
+        "interpretation": "The runbook for 'loyalty_api_unavailable' does not list 'PROMO_TIMEOUT' as an expected error code, indicating a mismatch between the detected error and the suggested runbook."
+      }
+    ],
+    "root_cause": "The primary root cause is a payment gateway timeout, indicated by the 'GW_TIMEOUT_503' error code, leading to customers being unable to complete transactions.",
+    "probable_category": "payment_timeout",
+    "top_causes": [
+      "Upstream payment gateway service degradation or maintenance",
+      "Network connectivity loss between store and payment gateway",
+      "Payment gateway certificate expiry causing TLS handshake failure"
+    ],
+    "confidence": 0.85,
+    "confidence_rationale": "The symptom 'Payment retries failing on 18 SCO units across Store 104; customers unable to complete basket at card reader' directly matches the 'payment_timeout' runbook symptoms. The error code 'GW_TIMEOUT_503' is explicitly listed in the 'payment_timeout' runbook and is also present in the known taxonomy for 'pos-payment'. The pattern map also correctly suggests 'payment_timeout'. Although the top runbook match was incorrectly identified as 'loyalty_api_unavailable.md' with a low combined score of 57%, the strong match with the 'payment_timeout' runbook based on symptoms and error codes overrides this. The presence of 'GW_CONNECT_REFUSED' and 'PAYMENT_SVC_UNAVAILABLE' in the logs further supports a payment timeout issue, as these are also in the 'payment_timeout' runbook's error code list.",
+    "reasoning_trace": "1) The incident symptoms clearly describe payment failures and customers unable to complete transactions, with 'GW_TIMEOUT_503' flooding the logs. 2) The error code 'GW_TIMEOUT_503' is in the known taxonomy for 'pos-payment'. Other relevant error codes like 'GW_CONNECT_REFUSED' and 'PAYMENT_SVC_UNAVAILABLE' are also in the taxonomy. 3) The 'payment_timeout' runbook explicitly lists 'GW_TIMEOUT_503' and 'GW_CONNECT_REFUSED' as symptoms and probable causes related to payment gateway issues. The symptoms described in the incident ('Payment retries failing', 'customers unable to complete basket', 'GW_TIMEOUT_503 flooding logs') align perfectly with the 'payment_timeout' runbook's symptoms ('Repeated GW_TIMEOUT_503 or GW_CONNECT_REFUSED in pos-payment or payment-gateway logs', 'Customer basket stuck at payment confirmation screen', 'Multiple checkout lanes affected simultaneously'). 4) Based on the strong match between symptoms, error codes, and the 'payment_timeout' runbook, the root cause is a payment gateway timeout.",
+    "needs_reretrieval": false,
+    "reretrieval_query": ""
+  },
+  "2dd8beb8f2d80933": {
+    "conflicts": [],
+    "root_cause": "The payment gateway is experiencing timeouts, leading to payment retries failing and the payment service becoming unavailable, likely due to an upstream service degradation or network connectivity issue.",
+    "probable_category": "payment_timeout",
+    "top_causes": [
+      "Upstream payment gateway service degradation or maintenance",
+      "Network connectivity loss between store and payment gateway",
+      "Payment gateway certificate expiry causing TLS handshake failure"
+    ],
+    "confidence": 0.67,
+    "confidence_rationale": "The error code 'GW_TIMEOUT_503' is explicitly listed in the 'payment_timeout.md' runbook and is present in the logs. 'PAYMENT_SVC_UNAVAILABLE' is also in the known taxonomy and is a direct symptom of payment gateway issues. The incident symptoms (payment retries failing, customers unable to complete basket, multiple SCO units affected) align perfectly with the 'payment_timeout' pattern. The provided 'combined score: 67%' falls within the 0.60-0.79 range for a runbook match that is not 'strong' (which would be 0.80-0.95).",
+    "reasoning_trace": "1) Error codes 'GW_TIMEOUT_503' and 'PAYMENT_SVC_UNAVAILABLE' were found in the logs and incident description. 2) Both error codes are present in the 'Known taxonomy for pos-payment'. No conflicts detected. 3) The 'GW_TIMEOUT_503' error code and the symptoms ('Payment retries failing on 18 SCO units', 'customers unable to complete basket', 'GW_TIMEOUT_503 flooding logs') directly match the 'payment_timeout.md' runbook's symptoms and error codes. The 'PAYMENT_SVC_UNAVAILABLE' and 'Circuit breaker OPEN' messages further support a payment gateway issue. The 'Top runbook match: payment_timeout.md (combined score: 67%)' confirms this. 4) Conclusion is a payment gateway timeout issue, with potential causes listed from the runbook.",
+    "needs_reretrieval": false,
+    "reretrieval_query": ""
+  },
+  "d3f432ef7ecc4d00": {
+    "conflicts": [],
+    "root_cause": "Rule-based: receipt_printer_failure",
+    "probable_category": "receipt_printer_failure",
+    "top_causes": [
+      "Pattern match: receipt_printer_failure",
+      "LLM unavailable \u2014 rule-based fallback"
+    ],
+    "confidence": 0.65,
+    "confidence_rationale": "Fallback: error code 'PRINTER_OFFLINE_ERR' maps to 'receipt_printer_failure' in PATTERN_MAP. Top runbook match: receipt_printer_failure.md at 58%.",
+    "reasoning_trace": "1) Error codes found: ['PRINTER_OFFLINE_ERR', 'CUPS_QUEUE_BLOCKED', 'RECEIPT_SVC_TIMEOUT']\n2) Taxonomy match for receipt-service: ['PRINTER_OFFLINE_ERR', 'CUPS_QUEUE_BLOCKED', 'RECEIPT_SVC_TIMEOUT']\n3) PATTERN_MAP suggests: receipt_printer_failure\n4) Top runbook: receipt_printer_failure.md (58%)\n5) LLM unavailable \u2014 rule-based conclusion used.\n",
+    "needs_reretrieval": false,
+    "reretrieval_query": ""
   }
 }

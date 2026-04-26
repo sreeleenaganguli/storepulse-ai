@@ -1,0 +1,20 @@
+{
+  "incident": {
+    "id": "INC-BARCODE-SCANNER-ISSUE-20241120-0042",
+    "service": "scan-service",
+    "severity": "Sev3",
+    "symptoms": "Barcode scanner not registering items on lanes 3, 9, 12; USB device disappeared from /dev/; customers required to enter barcodes manually",
+    "timestamps": {
+      "created": "2024-11-20T14:05:00Z",
+      "resolved": "2024-11-20T14:38:00Z"
+    },
+    "resolution_code": "USB_REENUMERATION_SUCCESS"
+  },
+  "logs": [
+    {"time":"2024-11-20T14:03:22Z","service":"sco-ui","level":"ERROR","message":"SCAN_DEVICE_LOST: /dev/hidraw3 disconnected unexpectedly","error_code":"SCAN_DEVICE_LOST"},
+    {"time":"2024-11-20T14:03:58Z","service":"sco-ui","level":"ERROR","message":"USB_ENUM_FAILURE: scanner at bus 2 port 5 failed to enumerate","error_code":"USB_ENUM_FAILURE"},
+    {"time":"2024-11-20T14:04:30Z","service":"sco-ui","level":"WARN","message":"Scanner heartbeat lost for device SCAN-312; attempting reconnect","error_code":"USB_ENUM_FAILURE"},
+    {"time":"2024-11-20T14:05:11Z","service":"sco-ui","level":"ERROR","message":"item-lookup: received malformed barcode 4812930011; scan timeout","error_code":"SCAN_DECODE_ERROR"},
+    {"time":"2024-11-20T14:06:44Z","service":"sco-ui","level":"ERROR","message":"scan-service: barcode decode error on lane 9; retrying","error_code":"SCAN_DEVICE_LOST"}
+  ]
+}

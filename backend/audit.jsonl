@@ -17,3 +17,51 @@
 {"event": "triage_complete", "incident_id": "INC-RCP-20241108-0041", "attempt": 1, "category": "receipt_printer_failure", "confidence": 0.65, "validation_passed": true, "ts": "2026-04-24T21:19:23.151981+00:00"}
 {"event": "triage_start", "incident_id": "INC-SCO-20241115-0019", "service": "pos-payment", "severity": "Sev1", "attempt": 1, "ts": "2026-04-24T21:26:35.671713+00:00"}
 {"event": "triage_complete", "incident_id": "INC-SCO-20241115-0019", "attempt": 1, "category": "payment_timeout", "confidence": 0.67, "validation_passed": true, "ts": "2026-04-24T21:27:29.682918+00:00"}
+{"event": "triage_start", "incident_id": "INC-SCO-20241115-0019", "service": "pos-payment", "severity": "Sev1", "attempt": 1, "ts": "2026-04-26T18:16:49.392262+00:00"}
+{"event": "triage_start", "incident_id": "INC-SCO-20241115-0019", "service": "pos-payment", "severity": "Sev1", "attempt": 1, "ts": "2026-04-26T18:19:36.715643+00:00"}
+{"event": "triage_start", "incident_id": "INC-SCO-20241115-0019", "service": "pos-payment", "severity": "Sev1", "attempt": 1, "ts": "2026-04-26T18:20:25.999471+00:00"}
+{"event": "triage_error", "incident_id": "INC-SCO-20241115-0019", "attempt": 1, "error": "'IncidentInput' object has no attribute 'log_snippet'", "ts": "2026-04-26T18:20:26.014735+00:00"}
+{"event": "triage_start", "incident_id": "INC-SCO-20241115-0019", "service": "pos-payment", "severity": "Sev1", "attempt": 1, "ts": "2026-04-26T18:22:13.634531+00:00"}
+{"event": "triage_complete", "incident_id": "INC-SCO-20241115-0019", "attempt": 1, "category": "payment_timeout", "confidence": 0.67, "validation_passed": true, "ts": "2026-04-26T18:22:36.744908+00:00"}
+{"event": "triage_start", "incident_id": "INC-SCO-20241115-0019", "service": "pos-payment", "severity": "Sev1", "attempt": 1, "ts": "2026-04-26T18:23:50.872142+00:00"}
+{"event": "triage_complete", "incident_id": "INC-SCO-20241115-0019", "attempt": 1, "category": "payment_timeout", "confidence": 0.67, "validation_passed": true, "ts": "2026-04-26T18:23:53.238624+00:00"}
+{"event": "triage_start", "incident_id": "INC-TEST-001", "service": "pos-payment", "severity": "Sev2", "attempt": 1, "ts": "2026-04-26T18:26:29.641980+00:00"}
+{"event": "triage_complete", "incident_id": "INC-TEST-001", "attempt": 1, "category": "unknown", "confidence": 0.3, "validation_passed": true, "ts": "2026-04-26T18:26:32.856037+00:00"}
+{"event": "triage_start", "incident_id": "INC-TEST-001", "service": "pos-payment", "severity": "Sev2", "attempt": 1, "ts": "2026-04-26T18:43:53.945422+00:00"}
+{"event": "triage_complete", "incident_id": "INC-TEST-001", "attempt": 1, "category": "unknown", "confidence": 0.3, "validation_passed": true, "ts": "2026-04-26T18:43:57.536419+00:00"}
+{"event": "triage_start", "incident_id": "INC-TEST-001", "service": "pos-payment", "severity": "Sev2", "attempt": 1, "ts": "2026-04-26T18:55:03.792362+00:00"}
+{"event": "triage_complete", "incident_id": "INC-TEST-001", "attempt": 1, "category": "unknown", "confidence": 0.3, "validation_passed": true, "ts": "2026-04-26T18:55:32.613405+00:00"}
+{"event": "triage_start", "incident_id": "INC-SCO-20241115-0019", "service": "pos-payment", "severity": "Sev1", "attempt": 1, "ts": "2026-04-26T18:57:22.428908+00:00"}
+{"event": "triage_complete", "incident_id": "INC-SCO-20241115-0019", "attempt": 1, "category": "unknown", "confidence": 0.3, "validation_passed": true, "ts": "2026-04-26T18:57:27.032018+00:00"}
+{"event": "triage_start", "incident_id": "INC-TEST-001", "service": "pos-payment", "severity": "Sev2", "attempt": 1, "ts": "2026-04-26T19:09:26.341056+00:00"}
+{"event": "triage_complete", "incident_id": "INC-TEST-001", "attempt": 1, "category": "payment_timeout", "confidence": 0.65, "validation_passed": true, "ts": "2026-04-26T19:10:08.001414+00:00"}
+{"event": "triage_start", "incident_id": "INC-SCO-20241115-0019", "service": "pos-payment", "severity": "Sev1", "attempt": 1, "ts": "2026-04-26T19:15:02.362868+00:00"}
+{"event": "triage_start", "incident_id": "INC-TEST-001", "service": "pos-payment", "severity": "Sev2", "attempt": 1, "ts": "2026-04-26T19:18:47.603284+00:00"}
+{"event": "triage_complete", "incident_id": "INC-TEST-001", "attempt": 1, "category": "payment_timeout", "confidence": 0.65, "validation_passed": true, "ts": "2026-04-26T19:19:05.043956+00:00"}
+{"event": "triage_start", "incident_id": "INC-SCO-20241115-0019", "service": "pos-payment", "severity": "Sev1", "attempt": 1, "ts": "2026-04-26T19:20:34.065820+00:00"}
+{"event": "triage_start", "incident_id": "INC-SCO-20241115-0019", "service": "pos-payment", "severity": "Sev1", "attempt": 1, "ts": "2026-04-26T19:45:19.405251+00:00"}
+{"event": "triage_complete", "incident_id": "INC-SCO-20241115-0019", "attempt": 1, "category": "payment_timeout", "confidence": 0.85, "validation_passed": true, "ts": "2026-04-26T19:46:36.505457+00:00"}
+{"event": "triage_start", "incident_id": "INC-SCO-20241115-0019", "service": "pos-payment", "severity": "Sev1", "attempt": 1, "ts": "2026-04-26T19:49:58.757980+00:00"}
+{"event": "triage_complete", "incident_id": "INC-SCO-20241115-0019", "attempt": 1, "category": "payment_timeout", "confidence": 0.85, "validation_passed": true, "ts": "2026-04-26T19:50:26.414578+00:00"}
+{"event": "triage_start", "incident_id": "INC-SCO-20241115-0019", "service": "pos-payment", "severity": "Sev1", "attempt": 1, "ts": "2026-04-26T20:20:57.722222+00:00"}
+{"event": "triage_complete", "incident_id": "INC-SCO-20241115-0019", "attempt": 1, "category": "payment_timeout", "confidence": 0.67, "validation_passed": true, "ts": "2026-04-26T20:21:29.974275+00:00"}
+{"event": "triage_start", "incident_id": "INC-SCO-20241115-0019", "service": "pos-payment", "severity": "Sev1", "attempt": 1, "ts": "2026-04-26T20:29:11.474470+00:00"}
+{"event": "triage_complete", "incident_id": "INC-SCO-20241115-0019", "attempt": 1, "category": "payment_timeout", "confidence": 0.67, "validation_passed": true, "ts": "2026-04-26T20:29:23.101407+00:00"}
+{"event": "triage_start", "incident_id": "INC-RCP-20241108-0041", "service": "receipt-service", "severity": "Sev2", "attempt": 1, "ts": "2026-04-26T20:34:34.377671+00:00"}
+{"event": "triage_complete", "incident_id": "INC-RCP-20241108-0041", "attempt": 1, "category": "receipt_printer_failure", "confidence": 0.65, "validation_passed": true, "ts": "2026-04-26T20:35:07.646121+00:00"}
+{"event": "triage_start", "incident_id": "INC-RCP-20241108-0041", "service": "receipt-service", "severity": "Sev2", "attempt": 1, "ts": "2026-04-26T20:52:56.170597+00:00"}
+{"event": "triage_complete", "incident_id": "INC-RCP-20241108-0041", "attempt": 1, "category": "receipt_printer_failure", "confidence": 0.65, "validation_passed": true, "ts": "2026-04-26T20:53:10.349706+00:00"}
+{"event": "triage_start", "incident_id": "INC-RCP-20241108-0041", "service": "receipt-service", "severity": "Sev2", "attempt": 1, "ts": "2026-04-26T21:02:43.775328+00:00"}
+{"event": "triage_complete", "incident_id": "INC-RCP-20241108-0041", "attempt": 1, "category": "receipt_printer_failure", "confidence": 0.65, "validation_passed": true, "ts": "2026-04-26T21:02:49.127354+00:00"}
+{"event": "triage_start", "incident_id": "INC-SCO-20241115-0019", "service": "pos-payment", "severity": "Sev1", "attempt": 1, "ts": "2026-04-26T21:03:47.385237+00:00"}
+{"event": "triage_complete", "incident_id": "INC-SCO-20241115-0019", "attempt": 1, "category": "payment_timeout", "confidence": 0.67, "validation_passed": true, "ts": "2026-04-26T21:03:53.240851+00:00"}
+{"event": "triage_start", "incident_id": "INC-SCO-20241115-0019", "service": "pos-payment", "severity": "Sev1", "attempt": 1, "ts": "2026-04-26T21:05:25.129594+00:00"}
+{"event": "triage_complete", "incident_id": "INC-SCO-20241115-0019", "attempt": 1, "category": "payment_timeout", "confidence": 0.67, "validation_passed": true, "ts": "2026-04-26T21:05:27.641820+00:00"}
+{"event": "triage_start", "incident_id": "INC-SCN-20241201-0007", "service": "scan-service", "severity": "Sev2", "attempt": 1, "ts": "2026-04-26T21:09:54.812668+00:00"}
+{"event": "triage_complete", "incident_id": "INC-SCN-20241201-0007", "attempt": 1, "category": "unknown", "confidence": 0.3, "validation_passed": true, "ts": "2026-04-26T21:09:58.672240+00:00"}
+{"event": "triage_start", "incident_id": "INC-SCO-20241115-0019", "service": "pos-payment", "severity": "Sev1", "attempt": 1, "ts": "2026-04-26T21:35:57.960706+00:00"}
+{"event": "triage_complete", "incident_id": "INC-SCO-20241115-0019", "attempt": 1, "category": "payment_timeout", "confidence": 0.67, "validation_passed": true, "ts": "2026-04-26T21:36:00.236031+00:00"}
+{"event": "triage_start", "incident_id": "INC-NET-20241130-0055", "service": "store-network", "severity": "Sev1", "attempt": 1, "ts": "2026-04-26T21:37:20.304927+00:00"}
+{"event": "triage_complete", "incident_id": "INC-NET-20241130-0055", "attempt": 1, "category": "unknown", "confidence": 0.3, "validation_passed": true, "ts": "2026-04-26T21:38:11.249417+00:00"}
+{"event": "triage_start", "incident_id": "INC-SCN-20241201-0007", "service": "scan-service", "severity": "Sev2", "attempt": 1, "ts": "2026-04-26T21:50:28.420992+00:00"}
+{"event": "triage_complete", "incident_id": "INC-SCN-20241201-0007", "attempt": 1, "category": "unknown", "confidence": 0.3, "validation_passed": true, "ts": "2026-04-26T21:50:31.727480+00:00"}

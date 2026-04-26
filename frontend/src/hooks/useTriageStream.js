@@ -46,7 +46,7 @@ export function useTriageStream() {
 
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 8000); // 8s timeout
+      const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
       const resp = await fetch("/api/triage/stream", {
         method: "POST",

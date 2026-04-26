@@ -28,8 +28,8 @@ export default function App() {
     <div style={{ minHeight:"100dvh", background:"var(--color-bg)" }}>
       <TopBar health={health}/>
 
-      <main className="max-w-screen-xl mx-auto px-4 py-5"
-        style={{ display:"grid", gridTemplateColumns:"minmax(360px,420px) 1fr", gap:"20px", alignItems:"start" }}>
+      <main className="max-w-screen-2xl mx-auto px-4 py-5"
+        style={{ display:"grid", gridTemplateColumns:"minmax(420px,520px) 1fr", gap:"20px", alignItems:"start" }}>
 
         {/* ── LEFT PANEL ─────────────────────────────────────────────── */}
         <div className="flex flex-col gap-4 sticky top-20">

@@ -1,4 +1,6 @@
 import { useState, useRef, useCallback } from "react";
+import { buildFallbackResult, FALLBACK_AGENT_EVENTS } from "../lib/fallbackTriageData";
+import { ENDPOINTS } from "../config";
 
 const INITIAL = {
   status: "idle",       // idle | streaming | done | error
@@ -6,6 +8,7 @@ const INITIAL = {
   conflicts: [],
   result: null,
   errorMsg: null,
+  isFallback: false,
 };
 
 export function useTriageStream() {
@@ -17,17 +20,43 @@ export function useTriageStream() {
     setState(INITIAL);
   }, []);
 
+  // ── Fallback: simulate streaming with mock data ──────────────────────
+  const runFallback = useCallback(async (incidentPayload) => {
+    setState(s => ({ ...s, status: "streaming", isFallback: true }));
+
+    // Simulate agent events with delays
+    for (const evt of FALLBACK_AGENT_EVENTS) {
+      await new Promise(r => setTimeout(r, 400));
+      setState(s => ({ ...s, agentEvents: [...s.agentEvents, evt] }));
+    }
+
+    await new Promise(r => setTimeout(r, 300));
+    const result = buildFallbackResult(incidentPayload);
+    setState(s => ({
+      ...s,
+      status: "done",
+      result,
+      conflicts: result.conflicts || [],
+    }));
+  }, []);
+
+  // ── Primary: stream from real API ────────────────────────────────────
   const startTriage = useCallback(async (incidentPayload) => {
     reset();
     setState(s => ({ ...s, status: "streaming" }));
 
     try {
-      // Post incident to get a stream — using fetch + ReadableStream for SSE over POST
-      const resp = await fetch("/api/triage/stream", {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+      const resp = await fetch(ENDPOINTS.TRIAGE_STREAM, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(incidentPayload),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeout);
 
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
@@ -82,17 +111,31 @@ export function useTriageStream() {
 
       setState(s => s.status === "streaming" ? { ...s, status: "done" } : s);
     } catch (err) {
-      setState(s => ({ ...s, status: "error", errorMsg: err.message }));
+      // ── Fallback on any network/timeout error ──────────────────────
+      console.warn("[StorePulse] API unavailable, switching to fallback mode:", err.message);
+      reset();
+      runFallback(incidentPayload);
     }
-  }, [reset]);
+  }, [reset, runFallback]);
 
   const confirm = useCallback(async (incidentId, confirmedSteps, rejectedSteps) => {
-    const res = await fetch("/api/confirm", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ incident_id: incidentId, confirmed_steps: confirmedSteps, rejected_steps: rejectedSteps }),
-    });
-    return res.json();
+    try {
+      const res = await fetch(ENDPOINTS.CONFIRM, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ incident_id: incidentId, confirmed_steps: confirmedSteps, rejected_steps: rejectedSteps }),
+      });
+      return res.json();
+    } catch {
+      // Fallback confirm response when API is down
+      return {
+        status: "confirmed",
+        incident_id: incidentId,
+        confirmed_count: confirmedSteps.length,
+        rejected_count: rejectedSteps.length,
+        receipt: `[Offline] Actions ${confirmedSteps} confirmed locally at ${new Date().toISOString()}`,
+      };
+    }
   }, []);
 
   return { state, startTriage, reset, confirm };

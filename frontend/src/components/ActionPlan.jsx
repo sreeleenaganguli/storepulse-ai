@@ -1,7 +1,11 @@
 import { useState } from "react";
-import { CheckCircle2, XCircle, Shield, Send, ChevronDown, ChevronRight } from "lucide-react";
+import { CheckCircle2, XCircle, Shield, Send, ChevronDown, ChevronRight, Lock } from "lucide-react";
+import { useAuth } from "../AuthContext";
 
 export default function ActionPlan({ result, onConfirm }) {
+  const { user } = useAuth();
+  const isGuest = user?.role === 'GUEST';
+
   const [stepState, setStepState] = useState(() =>
     Object.fromEntries((result.action_plan || []).map(s => [s.step, { status:"pending", reason:"" }]))
   );
@@ -9,8 +13,10 @@ export default function ActionPlan({ result, onConfirm }) {
   const [receipt, setReceipt] = useState(null);
   const [showEscalation, setShowEscalation] = useState(false);
 
-  const setStep = (step, patch) =>
+  const setStep = (step, patch) => {
+    if (isGuest) return;
     setStepState(s => ({ ...s, [step]: { ...s[step], ...patch } }));
+  };
 
   const handleSubmit = async () => {
     const confirmed = Object.entries(stepState).filter(([,v]) => v.status === "confirmed").map(([k]) => parseInt(k));
@@ -149,8 +155,13 @@ export default function ActionPlan({ result, onConfirm }) {
           )}
 
           <button onClick={handleSubmit}
-            className="btn btn-primary flex items-center justify-center gap-2 w-full">
-            <Send size={13}/> Submit Confirmed Actions
+            disabled={isGuest}
+            className="btn btn-primary flex items-center justify-center gap-2 w-full disabled:opacity-50 disabled:cursor-not-allowed">
+            {isGuest ? (
+              <><Lock size={13}/> Submit Disabled for Guest View</>
+            ) : (
+              <><Send size={13}/> Submit Confirmed Actions</>
+            )}
           </button>
         </>
       ) : (

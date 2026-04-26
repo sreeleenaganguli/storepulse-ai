@@ -34,16 +34,40 @@ export default function IncidentForm({ onSubmit, onReset, isStreaming }) {
     setTimeout(() => setActiveDemo(null), 800);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.symptoms.trim()) return;
-    // Include the ingested files in the payload
-    const payload = {
-      ...form,
-      log_file_reference: files
-    };
-    console.log("Form submitted:", payload);
-    onSubmit(payload);
+
+    // Convert files to Base64 to send binary content in JSON
+    const filePromises = files.map(file => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve({
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          content: reader.result.split(',')[1] // Extract base64 part
+        });
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    });
+
+    try {
+      const encodedFiles = await Promise.all(filePromises);
+      
+      const payload = {
+        ...form,
+        log_file_reference: encodedFiles
+      };
+
+      console.log("Form submitted with binary content (Base64):", payload);
+      onSubmit(payload);
+    } catch (err) {
+      console.error("Failed to encode files:", err);
+      // Fallback to sending without files if encoding fails
+      onSubmit(form);
+    }
   };
 
   const handleReset = () => { setForm(EMPTY); onReset(); setActiveDemo(null); setFiles([]); };

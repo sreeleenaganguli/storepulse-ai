@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { buildFallbackResult, FALLBACK_AGENT_EVENTS } from "../lib/fallbackTriageData";
+import { ENDPOINTS } from "../config";
 
 const INITIAL = {
   status: "idle",       // idle | streaming | done | error
@@ -48,7 +49,7 @@ export function useTriageStream() {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
-      const resp = await fetch("/api/triage/stream", {
+      const resp = await fetch(ENDPOINTS.TRIAGE_STREAM, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(incidentPayload),
@@ -119,7 +120,7 @@ export function useTriageStream() {
 
   const confirm = useCallback(async (incidentId, confirmedSteps, rejectedSteps) => {
     try {
-      const res = await fetch("/api/confirm", {
+      const res = await fetch(ENDPOINTS.CONFIRM, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ incident_id: incidentId, confirmed_steps: confirmedSteps, rejected_steps: rejectedSteps }),

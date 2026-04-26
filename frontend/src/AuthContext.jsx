@@ -6,24 +6,24 @@ const AuthContext = createContext(null);
 const mockLoginApi = async (email, password) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      if (email === 'admin' && password === 'admin') {
+      if (email === 'DevOpsEng' && password === 'pass') {
         resolve({
           id: 1,
-          name: 'Admin User',
-          email: 'admin@company.com',
-          role: 'ADMIN',
-          token: 'mock-token-admin-123'
+          name: 'DevOps Engineer',
+          email: 'devops@company.com',
+          role: 'DevOpsEng',
+          token: 'mock-token-devops-123'
         });
-      } else if (email === 'guest' && password === 'guest') {
+      } else if (email === 'StoreManager' && password === 'pass') {
         resolve({
           id: 2,
-          name: 'Guest User',
-          email: 'guest@company.com',
-          role: 'GUEST',
-          token: 'mock-token-guest-456'
+          name: 'Store Manager',
+          email: 'storemanager@company.com',
+          role: 'StoreManager',
+          token: 'mock-token-storemanager-456'
         });
       } else {
-        reject(new Error('Invalid credentials. Use admin/admin'));
+        reject(new Error('Invalid credentials. Use DevOpsEng or StoreManager / pass'));
       }
     }, 600);
   });
@@ -57,16 +57,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginAsGuest = async () => {
-    try {
-      const userData = await mockLoginApi('guest', 'guest');
-      setUser(userData);
-      localStorage.setItem('storepulse_user', JSON.stringify(userData));
-      return userData;
-    } catch (error) {
-      throw error;
-    }
-  };
 
   const logout = () => {
     setUser(null);
@@ -74,7 +64,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, loginAsGuest, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
       {!isLoading && children}
     </AuthContext.Provider>
   );

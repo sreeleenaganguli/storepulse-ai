@@ -145,7 +145,7 @@ export default function LoginPage() {
   const [selectedFeature, setSelectedFeature] = useState(null);
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const { login, loginAsGuest, user } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const carouselRef = useRef(null);
@@ -197,24 +197,12 @@ export default function LoginPage() {
       await login(email, password);
       navigate(from, { replace: true });
     } catch (err) {
-      setError("Invalid credentials. Try admin / admin");
+      setError("Invalid credentials. Use DevOpsEng or StoreManager with password 'pass'");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGuestLogin = async () => {
-    setError("");
-    setLoading(true);
-    try {
-      await loginAsGuest();
-      navigate(from, { replace: true });
-    } catch {
-      setError("Guest login failed");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const lastUsed = localStorage.getItem("storepulse_last_email");
 
@@ -425,7 +413,7 @@ export default function LoginPage() {
                         setEmailError(validateEmail(e.target.value));
                     }}
                     onBlur={() => setEmailError(validateEmail(email))}
-                    placeholder="admin"
+                    placeholder="DevOpsEng or StoreManager"
                     className="w-full bg-[#111827] text-slate-200 text-sm p-3 rounded-lg focus:outline-none transition-all"
                     style={{
                       border: `1px solid ${emailError ? "#f43f5e" : email ? "#00d4ff40" : "#1f2937"}`,
@@ -465,7 +453,7 @@ export default function LoginPage() {
                       onBlur={() =>
                         setPasswordError(validatePassword(password))
                       }
-                      placeholder="admin"
+                      placeholder="pass"
                       className="w-full bg-[#111827] text-slate-200 text-sm p-3 pr-10 rounded-lg focus:outline-none transition-all"
                       style={{
                         border: `1px solid ${passwordError ? "#f43f5e" : password ? "#00d4ff40" : "#1f2937"}`,
@@ -558,13 +546,7 @@ export default function LoginPage() {
 
               {/* Footer links */}
               <div className="mt-6 flex flex-col gap-2 text-center">
-                <button
-                  onClick={handleGuestLogin}
-                  disabled={loading}
-                  className="text-xs text-slate-400 hover:text-emerald-400 font-medium transition-colors flex items-center justify-center gap-1"
-                >
-                  <Eye size={12} /> Continue as Guest (View Only)
-                </button>
+
                 <div className="text-xs text-slate-500">
                   No account?{" "}
                   <a

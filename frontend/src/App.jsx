@@ -10,12 +10,14 @@ import RunbookPanel from "./components/RunbookPanel.jsx";
 import LogViewer from "./components/LogViewer.jsx";
 import SimilarIncidents from "./components/SimilarIncidents.jsx";
 import { AlertCircle } from "lucide-react";
+import { useAuth } from "./AuthContext.jsx";
 
 function SkeletonBlock({ h = "80px" }) {
   return <div className="skeleton rounded-xl w-full" style={{ height: h }}/>;
 }
 
 export default function App() {
+  const { user } = useAuth();
   const health = useHealth();
   const { state, startTriage, reset, confirm } = useTriageStream();
   const { status, agentEvents, conflicts, result, errorMsg } = state;
@@ -38,7 +40,7 @@ export default function App() {
           </div>
 
           {/* Agent timeline — shows as soon as streaming starts */}
-          {(isStreaming || isDone || isError) && (
+          {user?.role !== 'StoreManager' && (isStreaming || isDone || isError) && (
             <AgentTimeline agentEvents={agentEvents} streamStatus={status}/>
           )}
         </div>
@@ -97,7 +99,7 @@ export default function App() {
             <>
               <TriageSummary result={result}/>
               <ActionPlan result={result} onConfirm={confirm}/>
-              <RunbookPanel chunks={result.retrieved_runbooks}/>
+              {user?.role === 'DevOpsEng' && <RunbookPanel chunks={result.retrieved_runbooks}/>}
               <LogViewer logs={result.raw_logs}/>
               <SimilarIncidents incidents={result.similar_incidents}/>
             </>

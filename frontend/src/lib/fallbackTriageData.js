@@ -5,16 +5,16 @@
  */
 
 const FALLBACK_AGENT_EVENTS = [
-  { type: "agent_step", agent: "ingestor",      status: "running", message: "Extracting entities and parsing log timeline..." },
-  { type: "agent_step", agent: "ingestor",      status: "done",    message: "Extracted 3 error codes · 4 log lines parsed (fallback)" },
-  { type: "agent_step", agent: "researcher",    status: "running", message: "Searching runbooks and similar incidents..." },
-  { type: "agent_step", agent: "researcher",    status: "done",    message: "Found 3 runbook chunks · 2 similar incidents (fallback)" },
+  { type: "agent_step", agent: "ingestor", status: "running", message: "Extracting entities and parsing log timeline..." },
+  { type: "agent_step", agent: "ingestor", status: "done", message: "Extracted 3 error codes · 4 log lines parsed (fallback)" },
+  { type: "agent_step", agent: "researcher", status: "running", message: "Searching runbooks and similar incidents..." },
+  { type: "agent_step", agent: "researcher", status: "done", message: "Found 3 runbook chunks · 2 similar incidents (fallback)" },
   { type: "agent_step", agent: "diagnostician", status: "running", message: "Analyzing root cause and conflicts..." },
-  { type: "agent_step", agent: "diagnostician", status: "done",    message: "Root cause identified with 0.82 confidence (fallback)" },
-  { type: "agent_step", agent: "action_planner",status: "running", message: "Generating action plan..." },
-  { type: "agent_step", agent: "action_planner",status: "done",    message: "5-step action plan generated (fallback)" },
-  { type: "agent_step", agent: "validator",     status: "running", message: "Running validation checks..." },
-  { type: "agent_step", agent: "validator",     status: "done",    message: "All 8 checks passed (fallback)" },
+  { type: "agent_step", agent: "diagnostician", status: "done", message: "Root cause identified with 0.82 confidence (fallback)" },
+  { type: "agent_step", agent: "action_planner", status: "running", message: "Generating action plan..." },
+  { type: "agent_step", agent: "action_planner", status: "done", message: "5-step action plan generated (fallback)" },
+  { type: "agent_step", agent: "validator", status: "running", message: "Running validation checks..." },
+  { type: "agent_step", agent: "validator", status: "done", message: "All 8 checks passed (fallback)" },
 ];
 
 const FALLBACK_RESPONSES = {
@@ -70,7 +70,9 @@ const FALLBACK_RESPONSES = {
     handoff_note: "Incident reported with backend offline. Generic triage applied. Once backend is restored, re-run analysis for AI-powered root cause identification.",
     reasoning_trace: "[Fallback Mode] Backend API was non-responsive. This generic response was generated from local fallback data. Re-analyse once connectivity is restored for full AI triage.",
     incidents: [],
-    runbooks: [],
+    runbooks: [
+      { source: "runbooks/generic_triage.md", section: "Initial Investigation", content: "1. Check service health dashboard.\n2. Review recent deployments.\n3. Inspect logs for error patterns.", score: 0.85 }
+    ],
   },
 };
 
@@ -82,30 +84,38 @@ export function buildFallbackResult(incident) {
   const template = FALLBACK_RESPONSES[service] || FALLBACK_RESPONSES.default;
 
   return {
-    incident_id:        incident?.incident_id || "FALLBACK",
-    incident_summary:   `[Offline Fallback] Triage for ${service || "unknown service"} — ${incident?.severity || "Unknown"} severity. ${incident?.symptoms || "No symptoms provided."}`,
-    probable_category:  template.probable_category,
-    root_cause:         template.root_cause,
-    top_causes:         template.top_causes,
-    conflicts:          [],
-    action_plan:        template.action_plan,
-    escalation_path:    template.escalation_path,
-    handoff_note:       template.handoff_note,
-    confidence:         template.confidence,
+    incident_id: incident?.incident_id || "FALLBACK",
+    incident_summary: `[Offline Fallback] Triage for ${service || "unknown service"} — ${incident?.severity || "Unknown"} severity. ${incident?.symptoms || "No symptoms provided."}`,
+    probable_category: template.probable_category,
+    root_cause: template.root_cause,
+    top_causes: template.top_causes,
+    conflicts: [],
+    action_plan: template.action_plan,
+    escalation_path: template.escalation_path,
+    handoff_note: template.handoff_note,
+    confidence: template.confidence,
     confidence_rationale: template.confidence_rationale,
-    reasoning_trace:    template.reasoning_trace,
-    retrieved_runbooks: template.runbooks,
-    similar_incidents:  template.incidents,
-    raw_logs:           (incident?.log_snippet || "").split("\n").filter(Boolean).map(line => ({
+    reasoning_trace: template.reasoning_trace,
+    retrieved_runbooks: (template.runbooks || []).map((rb, i) => ({
+      id: `fallback-rb-${i}`,
+      filename: rb.source,
+      pattern_id: rb.section,
+      text: rb.content,
+      combined_score: rb.score,
+      semantic_score: rb.score * 0.95,
+      keyword_score: rb.score * 0.85,
+    })),
+    similar_incidents: template.incidents,
+    raw_logs: (incident?.log_snippet || "").split("\n").filter(Boolean).map(line => ({
       time: line.substring(0, 23),
       level: line.includes("ERROR") ? "ERROR" : line.includes("WARN") ? "WARN" : "INFO",
       service: service,
       message: line.substring(24).trim(),
       error_code: (line.match(/\[([A-Z_]+)\]/) || [])[1] || null,
     })),
-    entities:           { affected_services: [service], primary_error_code: null },
-    validation_passed:  true,
-    validation_notes:   ["Fallback mode — validation simulated."],
+    entities: { affected_services: [service], primary_error_code: null },
+    validation_passed: true,
+    validation_notes: ["Fallback mode — validation simulated."],
   };
 }
 

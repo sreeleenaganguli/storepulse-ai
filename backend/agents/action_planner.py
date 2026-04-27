@@ -1,12 +1,17 @@
 """Action Planner Agent — new google.genai SDK."""
 from __future__ import annotations
 import json, re
-from google import genai
-from google.genai import types
-from config import GEMINI_API_KEY, MODEL_PLANNER
+from langchain_openai import ChatOpenAI
+from config import api_endpoint, api_key, client, MODEL_PLANNER
 from state import AgentState
 
-_client = genai.Client(api_key=GEMINI_API_KEY)
+llm = ChatOpenAI(
+    base_url=api_endpoint,
+    api_key=api_key,
+    model=MODEL_PLANNER,
+    http_client=client,
+    temperature=0.2
+)
 
 _SYSTEM = """You are an expert store-systems incident commander. Write clear 5-step action plans.
 Return ONLY valid JSON:
@@ -69,19 +74,12 @@ SIMILAR RESOLVED BY:
 Return JSON only."""
 
     try:
-        resp = _client.models.generate_content(
-            model=MODEL_PLANNER,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=_SYSTEM,
-                response_mime_type="application/json",
-                temperature=0.2,
-            )
-        )
-        raw    = re.sub(r"^```(?:json)?\s*", "", resp.text.strip())
+        resp = llm.invoke([("system", _SYSTEM), ("user", prompt)])
+        raw    = re.sub(r"^```(?:json)?\s*", "", resp.content.strip())
         raw    = re.sub(r"\s*```$", "", raw)
         result = json.loads(raw)
-    except Exception:
+    except Exception as e:
+        print(f"[ActionPlanner] LLM Error: {e}")
         result = {
             "action_plan": [
                 {"step": 1, "action": "Check service health endpoint",              "rationale": "First diagnostic step",              "is_bcp": False},

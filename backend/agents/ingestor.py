@@ -1,12 +1,17 @@
 """Ingestor Agent — uses new google.genai SDK."""
 from __future__ import annotations
 import json, re
-from google import genai
-from google.genai import types
-from config import GEMINI_API_KEY, MODEL_INGESTOR
+from langchain_openai import ChatOpenAI
+from config import api_endpoint, api_key, client, MODEL_INGESTOR
 from state import AgentState
 
-_client = genai.Client(api_key=GEMINI_API_KEY)
+llm = ChatOpenAI(
+    base_url=api_endpoint,
+    api_key=api_key,
+    model=MODEL_INGESTOR,
+    http_client=client,
+    temperature=0.0
+)
 
 _SYSTEM = """You are a store-systems incident data extractor.
 Extract structured information from the incident and return ONLY valid JSON:
@@ -64,19 +69,12 @@ LOG SNIPPET:
 Extract all structured information. Return JSON only."""
 
     try:
-        resp = _client.models.generate_content(
-            model=MODEL_INGESTOR,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=_SYSTEM,
-                response_mime_type="application/json",
-                temperature=0.0,
-            )
-        )
-        raw = re.sub(r"^```(?:json)?\s*", "", resp.text.strip())
+        resp = llm.invoke([("system", _SYSTEM), ("user", prompt)])
+        raw = re.sub(r"^```(?:json)?\s*", "", resp.content.strip())
         raw = re.sub(r"\s*```$", "", raw)
         entities = json.loads(raw)
-    except Exception:
+    except Exception as e:
+        print(f"[Ingestor] LLM Error: {e}")
         entities = {
             "primary_error_code":  None,
             "error_codes":         [],

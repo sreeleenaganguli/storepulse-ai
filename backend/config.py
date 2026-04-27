@@ -2,8 +2,20 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import httpx
+import tiktoken
 
 load_dotenv()
+
+# Please modify the "tiktoken_cache_dir" to the directory wherever you are placing your "tiktoken_cache" folder
+tiktoken_cache_dir = "C:\\TestProject1\\tiktoken_cache"
+os.environ["TIKTOKEN_CACHE_DIR"] = tiktoken_cache_dir
+assert os.path.exists(os.path.join(tiktoken_cache_dir, "9b5ad71b2ce5302211f9c61530b329a4922fc6a4")), "Tiktoken cache not found in the specified path"
+
+client = httpx.Client(verify=False)
+
+api_endpoint = os.getenv("api_endpoint")
+api_key = os.getenv("api_key")
 
 # ── Paths ────────────────────────────────────────────────────────────────
 BASE_DIR   = Path(__file__).parent
@@ -13,14 +25,15 @@ AUDIT_FILE = BASE_DIR / "audit.jsonl"
 CACHE_FILE = BASE_DIR / "embed_cache.json"
 
 # ── API Keys ─────────────────────────────────────────────────────────────
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+# Removed GEMINI_API_KEY in favor of api_key and api_endpoint above
 
-# ── Model names — personal laptop (free tier, flash only) ─────────────────────
-MODEL_INGESTOR       = "gemini-2.5-flash"   # working ✅
-MODEL_DIAGNOSTICIAN  = "gemini-2.5-flash"   # working ✅
-MODEL_DIAG_FALLBACK  = "gemini-2.5-flash"   # same — only one working
-MODEL_PLANNER        = "gemini-2.5-flash"   # working ✅
-MODEL_FAST           = "gemini-2.5-flash"   # working ✅
+# ── Model names — Langchain OpenAI Azure ─────────────────────────────────
+MODEL_INGESTOR       = "genailab-maas-gpt-4o"
+MODEL_DIAGNOSTICIAN  = "genailab-maas-gpt-4o"
+MODEL_DIAG_FALLBACK  = "genailab-maas-gpt-4o"
+MODEL_PLANNER        = "genailab-maas-gpt-4o"
+MODEL_FAST           = "genailab-maas-gpt-4o"
+MODEL_EMBEDDING      = "azure/genailab-maas-text-embedding-3-large"
 
 # # ── Model names (Gemini-only) ─────────────────────────────────────────────
 # MODEL_INGESTOR      = "gemini-2.5-flash-lite"   # fast entity extraction

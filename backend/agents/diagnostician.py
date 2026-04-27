@@ -1,15 +1,12 @@
 """Diagnostician Agent — new google.genai SDK."""
 from __future__ import annotations
 import json, re
-from google import genai
-from google.genai import types
-from config import GEMINI_API_KEY, MODEL_DIAGNOSTICIAN, MODEL_DIAG_FALLBACK
+from langchain_openai import ChatOpenAI
+from config import api_endpoint, api_key, client, MODEL_DIAGNOSTICIAN, MODEL_DIAG_FALLBACK
 from config import ERROR_TAXONOMY, PATTERN_MAP
 from state import AgentState
 from models.schemas import ConflictItem
 from rag.response_cache import get_cached, set_cached
-
-_client = genai.Client(api_key=GEMINI_API_KEY)
 
 _SYSTEM = """You are a senior SRE specialising in retail store systems. Do diagnostic root-cause analysis.
 
@@ -36,16 +33,15 @@ CONFLICT RULE: error code in logs not in known taxonomy = conflict. Set needs_re
 
 
 def _call(model_name: str, prompt: str) -> str:
-    resp = _client.models.generate_content(
+    llm = ChatOpenAI(
+        base_url=api_endpoint,
+        api_key=api_key,
         model=model_name,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            system_instruction=_SYSTEM,
-            response_mime_type="application/json",
-            temperature=0.1,
-        )
+        http_client=client,
+        temperature=0.1
     )
-    return resp.text
+    resp = llm.invoke([("system", _SYSTEM), ("user", prompt)])
+    return resp.content
 
 
 def _parse(raw: str) -> dict:

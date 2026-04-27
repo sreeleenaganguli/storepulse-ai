@@ -1,7 +1,8 @@
-"""Embedding helper — local SentenceTransformer with persistent MD5 cache."""
+"""Embedding helper — Langchain OpenAI integration."""
 import hashlib, json
 from typing import List
-from config import CACHE_FILE
+from langchain_openai import OpenAIEmbeddings
+from config import CACHE_FILE, api_endpoint, api_key, client, MODEL_EMBEDDING
 
 
 _model = None
@@ -11,9 +12,13 @@ _cache: dict = {}
 def _get_model():
     global _model
     if _model is None:
-        from sentence_transformers import SentenceTransformer
-        print("[Embedder] Loading all-MiniLM-L6-v2 (downloads once ~80MB)...")
-        _model = SentenceTransformer("all-MiniLM-L6-v2")
+        print(f"[Embedder] Loading {MODEL_EMBEDDING}...")
+        _model = OpenAIEmbeddings(
+            base_url=api_endpoint,
+            api_key=api_key,
+            model=MODEL_EMBEDDING,
+            http_client=client
+        )
         print("[Embedder] Model loaded ✓")
     return _model
 
@@ -51,10 +56,10 @@ def embed(texts: List[str]) -> List[List[float]]:
 
     if to_fetch_texts:
         model = _get_model()
-        vecs  = model.encode(to_fetch_texts, convert_to_numpy=True, show_progress_bar=False)
+        vecs = model.embed_documents(to_fetch_texts)
         for j, vec in enumerate(vecs):
-            _cache[to_fetch_keys[j]] = vec.tolist()
-            results[to_fetch_idx[j]] = vec.tolist()
+            _cache[to_fetch_keys[j]] = vec
+            results[to_fetch_idx[j]] = vec
         _save_cache()
         print(f"[Embedder] Encoded {len(to_fetch_texts)} new texts, {len(texts) - len(to_fetch_texts)} from cache.")
 

@@ -469,5 +469,78 @@
     "reasoning_trace": "1) Error codes found: ['PRINTER_OFFLINE_ERR', 'CUPS_QUEUE_BLOCKED', 'RECEIPT_SVC_TIMEOUT']\n2) Taxonomy match for receipt-service: ['PRINTER_OFFLINE_ERR', 'CUPS_QUEUE_BLOCKED', 'RECEIPT_SVC_TIMEOUT']\n3) PATTERN_MAP suggests: receipt_printer_failure\n4) Top runbook: receipt_printer_failure.md (58%)\n5) LLM unavailable \u2014 rule-based conclusion used.\n",
     "needs_reretrieval": false,
     "reretrieval_query": ""
+  },
+  "ecc9036865a95a06": {
+    "conflicts": [],
+    "root_cause": "Intermittent network connectivity drops affecting all services in Store 089, likely due to a network switch issue.",
+    "probable_category": "store_network_flap",
+    "top_causes": [
+      "ISP line instability or upstream outage",
+      "Core switch port failure or SFP transceiver fault",
+      "Power fluctuation causing switch reboot"
+    ],
+    "confidence": 0.73,
+    "confidence_rationale": "The symptoms explicitly state 'Store network flapping on Store 089 \u2014 intermittent connectivity drops affecting all services' and 'Payment symptoms visible but root cause is network switch', which directly aligns with the 'store_network_flap' runbook's symptoms of 'Intermittent connectivity \u2014 devices cycling online/offline' and 'Multiple services failing simultaneously (payment, loyalty, promo)'. The top runbook match score is 73%.",
+    "reasoning_trace": "1) No explicit error codes were found in the logs. 2) The symptoms 'Store network flapping on Store 089 \u2014 intermittent connectivity drops affecting all services' and 'Payment symptoms visible but root cause is network switch' strongly match the 'store_network_flap' pattern. 3) The 'store_network_flap.md' runbook describes these exact symptoms, including 'Intermittent connectivity \u2014 devices cycling online/offline' and 'Multiple services failing simultaneously (payment, loyalty, promo)'. The similar incidents also point to 'NETWORK_SWITCH_FAILOVER' as a root cause for network flaps. 4) The conclusion is that this is a store network flap, with the root cause being a network switch issue.",
+    "needs_reretrieval": false,
+    "reretrieval_query": ""
+  },
+  "2388f2d2fe1dc29a": {
+    "conflicts": [],
+    "root_cause": "Intermittent network connectivity drops affecting all services in Store 089, likely due to a network switch issue.",
+    "probable_category": "store_network_flap",
+    "top_causes": [
+      "ISP line instability or upstream outage",
+      "Core switch port failure or SFP transceiver fault",
+      "Power fluctuation causing switch reboot"
+    ],
+    "confidence": 0.73,
+    "confidence_rationale": "The symptoms explicitly state 'Store network flapping on Store 089 \u2014 intermittent connectivity drops affecting all services' and 'Payment symptoms visible but root cause is network switch', which directly aligns with the 'store_network_flap' runbook's symptoms of 'Intermittent connectivity \u2014 devices cycling online/offline' and 'Multiple services failing simultaneously (payment, loyalty, promo)'. The top runbook match score is 73%.",
+    "reasoning_trace": "1) No explicit error codes were found in the logs. 2) The symptoms 'Store network flapping on Store 089 \u2014 intermittent connectivity drops affecting all services' and 'Payment symptoms visible but root cause is network switch' strongly match the 'store_network_flap' pattern. 3) The 'store_network_flap.md' runbook describes these exact symptoms, including 'Intermittent connectivity \u2014 devices cycling online/offline' and 'Multiple services failing simultaneously (payment, loyalty, promo)'. The similar incidents also point to 'NETWORK_SWITCH_FAILOVER' as a root cause for network flaps. 4) The conclusion is that this is a store network flap, with the root cause being a network switch issue.",
+    "needs_reretrieval": false,
+    "reretrieval_query": ""
+  },
+  "5b319703d9737468": {
+    "conflicts": [],
+    "root_cause": "Intermittent network connectivity drops affecting all services in Store 089, likely due to a network switch issue.",
+    "probable_category": "store_network_flap",
+    "top_causes": [
+      "ISP line instability or upstream outage",
+      "Core switch port failure or SFP transceiver fault",
+      "Power fluctuation causing switch reboot"
+    ],
+    "confidence": 0.73,
+    "confidence_rationale": "The symptoms explicitly state 'Store network flapping on Store 089 \u2014 intermittent connectivity drops affecting all services' and 'Payment symptoms visible but root cause is network switch', which directly aligns with the 'store_network_flap' runbook's symptoms of 'Intermittent connectivity \u2014 devices cycling online/offline' and 'Multiple services failing simultaneously (payment, loyalty, promo)'. The top runbook match score is 73%.",
+    "reasoning_trace": "1) No explicit error codes were found in the logs. 2) The symptoms 'Store network flapping on Store 089 \u2014 intermittent connectivity drops affecting all services' and 'Payment symptoms visible but root cause is network switch' strongly match the 'store_network_flap' pattern. 3) The 'store_network_flap.md' runbook describes these exact symptoms, including 'Intermittent connectivity \u2014 devices cycling online/offline' and 'Multiple services failing simultaneously (payment, loyalty, promo)'. The similar incidents also point to 'NETWORK_SWITCH_FAILOVER' as a root cause for network flaps. 4) The conclusion is that this is a store network flap, with the root cause being a network switch issue.",
+    "needs_reretrieval": false,
+    "reretrieval_query": ""
+  },
+  "ec82fdcad5d4fb32": {
+    "conflicts": [],
+    "root_cause": "Rule-based: promotion_engine_latency",
+    "probable_category": "promotion_engine_latency",
+    "top_causes": [
+      "Pattern match: promotion_engine_latency",
+      "LLM unavailable \u2014 rule-based fallback"
+    ],
+    "confidence": 0.65,
+    "confidence_rationale": "Fallback: error code 'PROMO_TIMEOUT' maps to 'promotion_engine_latency' in PATTERN_MAP. Top runbook match: promotion_engine_latency.md at 71%.",
+    "reasoning_trace": "1) Error codes found: ['PROMO_TIMEOUT', 'PROMO_ENGINE_CPU_HIGH', 'PROMOTION', 'BSKT77712', 'BASKET_EVAL_TIMEOUT', 'PROMO_ENGINE_RESTARTED_RULE_CACHE_CLEARED']\n2) Taxonomy match for promo-engine: ['PROMO_TIMEOUT', 'PROMO_ENGINE_CPU_HIGH', 'BASKET_EVAL_TIMEOUT']\n3) PATTERN_MAP suggests: promotion_engine_latency\n4) Top runbook: promotion_engine_latency.md (71%)\n5) LLM unavailable \u2014 rule-based conclusion used.\n",
+    "needs_reretrieval": false,
+    "reretrieval_query": ""
+  },
+  "4bd0b8754be541e4": {
+    "conflicts": [],
+    "root_cause": "Rule-based: promotion_engine_latency",
+    "probable_category": "promotion_engine_latency",
+    "top_causes": [
+      "Pattern match: promotion_engine_latency",
+      "LLM unavailable \u2014 rule-based fallback"
+    ],
+    "confidence": 0.65,
+    "confidence_rationale": "Fallback: error code 'PROMO_TIMEOUT' maps to 'promotion_engine_latency' in PATTERN_MAP. Top runbook match: promotion_engine_latency.md at 71%.",
+    "reasoning_trace": "1) Error codes found: ['PROMO_TIMEOUT', 'PROMO_ENGINE_CPU_HIGH', 'PROMOTION', 'BSKT77712', 'BASKET_EVAL_TIMEOUT', 'PROMO_ENGINE_RESTARTED_RULE_CACHE_CLEARED']\n2) Taxonomy match for promo-engine: ['PROMO_TIMEOUT', 'PROMO_ENGINE_CPU_HIGH', 'BASKET_EVAL_TIMEOUT']\n3) PATTERN_MAP suggests: promotion_engine_latency\n4) Top runbook: promotion_engine_latency.md (71%)\n5) LLM unavailable \u2014 rule-based conclusion used.\n",
+    "needs_reretrieval": false,
+    "reretrieval_query": ""
   }
 }

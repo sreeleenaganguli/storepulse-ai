@@ -73,8 +73,8 @@ def _decode_uploaded_files(incident: IncidentInput) -> IncidentInput:
         return incident
 
     _LOG_EXTENSIONS  = {".log", ".txt", ".out", ".err"}
-    _SKIP_EXTENSIONS = {".md"}          # seed/data files
-    _MAX_BYTES       = 50_000                               # ~50KB cap
+    _SKIP_EXTENSIONS = {".md"}          
+    _MAX_BYTES       = 500_000                               
 
     decoded_parts = []
     for file_obj in file_refs:
@@ -105,11 +105,6 @@ def _decode_uploaded_files(incident: IncidentInput) -> IncidentInput:
                 continue
 
             file_text = raw_bytes.decode("utf-8", errors="replace").strip()
-
-            # Guard 4 — skip if decoded content is JSON structure
-            if file_text.startswith(("{", "[")):
-                log.info(f"[FileIngest] Skipping JSON-structured file: {name}")
-                continue
 
             decoded_parts.append(f"# File: {name}\n{file_text}")
             log.info(f"[FileIngest] Decoded {name} — {len(file_text)} chars, "

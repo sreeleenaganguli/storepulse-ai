@@ -65,3 +65,17 @@
 {"event": "triage_complete", "incident_id": "INC-NET-20241130-0055", "attempt": 1, "category": "unknown", "confidence": 0.3, "validation_passed": true, "ts": "2026-04-26T21:38:11.249417+00:00"}
 {"event": "triage_start", "incident_id": "INC-SCN-20241201-0007", "service": "scan-service", "severity": "Sev2", "attempt": 1, "ts": "2026-04-26T21:50:28.420992+00:00"}
 {"event": "triage_complete", "incident_id": "INC-SCN-20241201-0007", "attempt": 1, "category": "unknown", "confidence": 0.3, "validation_passed": true, "ts": "2026-04-26T21:50:31.727480+00:00"}
+{"event": "triage_start", "incident_id": "INC-NET-20241130-0055", "service": "store-network", "severity": "Sev1", "attempt": 1, "ts": "2026-04-27T04:15:03.086971+00:00"}
+{"event": "triage_complete", "incident_id": "INC-NET-20241130-0055", "attempt": 1, "category": "store_network_flap", "confidence": 0.73, "validation_passed": true, "ts": "2026-04-27T04:15:41.765077+00:00"}
+{"event": "triage_start", "incident_id": "INC-NET-20241130-0055", "service": "store-network", "severity": "Sev1", "attempt": 1, "ts": "2026-04-27T04:27:56.235882+00:00"}
+{"event": "triage_complete", "incident_id": "INC-NET-20241130-0055", "attempt": 1, "category": "store_network_flap", "confidence": 0.73, "validation_passed": true, "ts": "2026-04-27T04:28:23.816750+00:00"}
+{"event": "triage_start", "incident_id": "INC-NET-20241130-0055", "service": "store-network", "severity": "Sev1", "attempt": 1, "ts": "2026-04-27T04:36:30.225122+00:00"}
+{"event": "triage_complete", "incident_id": "INC-NET-20241130-0055", "attempt": 1, "category": "store_network_flap", "confidence": 0.73, "validation_passed": true, "ts": "2026-04-27T04:36:54.114441+00:00"}
+{"event": "triage_start", "incident_id": "INC-PRO-20241125-0018", "service": "promo-engine", "severity": "Sev3", "attempt": 1, "ts": "2026-04-27T04:39:05.573300+00:00"}
+{"event": "triage_complete", "incident_id": "INC-PRO-20241125-0018", "attempt": 1, "category": "promotion_engine_latency", "confidence": 0.65, "validation_passed": true, "ts": "2026-04-27T04:39:09.695922+00:00"}
+{"event": "triage_start", "incident_id": "INC-PRO-20241125-0018", "service": "promo-engine", "severity": "Sev3", "attempt": 1, "ts": "2026-04-27T04:49:04.889294+00:00"}
+{"event": "triage_complete", "incident_id": "INC-PRO-20241125-0018", "attempt": 1, "category": "promotion_engine_latency", "confidence": 0.65, "validation_passed": true, "ts": "2026-04-27T04:49:33.424408+00:00"}
+{"event": "triage_start", "incident_id": "INC-PRO-20241125-0018", "service": "promo-engine", "severity": "Sev3", "attempt": 1, "ts": "2026-04-27T04:54:15.048141+00:00"}
+{"event": "triage_complete", "incident_id": "INC-PRO-20241125-0018", "attempt": 1, "category": "promotion_engine_latency", "confidence": 0.65, "validation_passed": true, "ts": "2026-04-27T04:54:39.151767+00:00"}
+{"event": "triage_start", "incident_id": "INC-PRO-20241125-0018", "service": "promo-engine", "severity": "Sev3", "attempt": 1, "ts": "2026-04-27T04:58:29.602487+00:00"}
+{"event": "triage_complete", "incident_id": "INC-PRO-20241125-0018", "attempt": 1, "category": "promotion_engine_latency", "confidence": 0.65, "validation_passed": true, "ts": "2026-04-27T04:58:55.707658+00:00"}

@@ -20,13 +20,14 @@ export default function SimilarIncidents({ incidents }) {
 
       {incidents.map((inc) => {
         const sevStyle = SEV_COLORS[inc.severity] || SEV_COLORS.Sev3;
-        const simPct = Math.round(inc.similarity * 100);
+        const score = inc.score ?? inc.similarity ?? 0;
+        const simPct = Math.round(score * 100);
         return (
-          <div key={inc.id} className="card-inner p-3 flex flex-col gap-2">
+          <div key={inc.incident_id || inc.id} className="card-inner p-3 flex flex-col gap-2">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <span className="mono text-xs font-semibold" style={{ color:"var(--color-text-muted)" }}>
-                  {inc.id}
+                  {inc.incident_id || inc.id}
                 </span>
                 <span className="badge text-xs" style={{ background:sevStyle.bg, color:sevStyle.text }}>
                   {inc.severity}
@@ -48,7 +49,7 @@ export default function SimilarIncidents({ incidents }) {
             <div className="flex items-center gap-1.5 text-xs">
               <span style={{ color:"var(--color-text-muted)" }}>Resolved by:</span>
               <span className="mono badge" style={{ background:"var(--color-success-hl)", color:"var(--color-success)", fontSize:"10px" }}>
-                {inc.resolution_code}
+                {inc.resolution || inc.resolution_code || "N/A"}
               </span>
             </div>
           </div>

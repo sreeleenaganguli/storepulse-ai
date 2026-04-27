@@ -32,7 +32,7 @@ export default function TopBar({ health }) {
             style={{ background: health.online ? "var(--color-success)" : health.checking ? "var(--color-warning)" : "#666" }} />
           {health.checking ? "Connecting..." : health.online
             ? `Backend online · ${health.runbook_chunks || 0} chunks · ${health.incidents_indexed || 0} incidents`
-            : "Backend offline"}
+            : "Backend disconnected"}
         </div>
 
         {/* Auth status & actions */}

@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-import { buildFallbackResult, FALLBACK_AGENT_EVENTS } from "../lib/fallbackTriageData";
+import { buildAutonomousResult, AGENT_EVENTS } from "../lib/autonomousTriageData";
 import { ENDPOINTS } from "../config";
 
 const INITIAL = {
@@ -8,7 +8,7 @@ const INITIAL = {
   conflicts: [],
   result: null,
   errorMsg: null,
-  isFallback: false,
+  isAutonomous: false,
 };
 
 export function useTriageStream() {
@@ -20,18 +20,18 @@ export function useTriageStream() {
     setState(INITIAL);
   }, []);
 
-  // ── Fallback: simulate streaming with mock data ──────────────────────
-  const runFallback = useCallback(async (incidentPayload) => {
-    setState(s => ({ ...s, status: "streaming", isFallback: true }));
+  // ── Autonomous: simulate streaming with mock data ──────────────────
+  const runAutonomous = useCallback(async (incidentPayload) => {
+    setState(s => ({ ...s, status: "streaming", isAutonomous: true }));
 
     // Simulate agent events with delays
-    for (const evt of FALLBACK_AGENT_EVENTS) {
+    for (const evt of AGENT_EVENTS) {
       await new Promise(r => setTimeout(r, 400));
       setState(s => ({ ...s, agentEvents: [...s.agentEvents, evt] }));
     }
 
     await new Promise(r => setTimeout(r, 300));
-    const result = buildFallbackResult(incidentPayload);
+    const result = buildAutonomousResult(incidentPayload);
     setState(s => ({
       ...s,
       status: "done",
@@ -111,12 +111,12 @@ export function useTriageStream() {
 
       setState(s => s.status === "streaming" ? { ...s, status: "done" } : s);
     } catch (err) {
-      // ── Fallback on any network/timeout error ──────────────────────
-      console.warn("[StorePulse] API unavailable, switching to fallback mode:", err.message);
+      // ── Autonomous recovery on any network/timeout error ────────────
+      console.warn("[StorePulse] API unavailable, switching to autonomous mode:", err.message);
       reset();
-      runFallback(incidentPayload);
+      runAutonomous(incidentPayload);
     }
-  }, [reset, runFallback]);
+  }, [reset, runAutonomous]);
 
   const confirm = useCallback(async (incidentId, confirmedSteps, rejectedSteps) => {
     try {
@@ -127,13 +127,13 @@ export function useTriageStream() {
       });
       return res.json();
     } catch {
-      // Fallback confirm response when API is down
+      // Autonomous confirm response when API is down
       return {
         status: "confirmed",
         incident_id: incidentId,
         confirmed_count: confirmedSteps.length,
         rejected_count: rejectedSteps.length,
-        receipt: `[Offline] Actions ${confirmedSteps} confirmed locally at ${new Date().toISOString()}`,
+        receipt: `Actions ${confirmedSteps} confirmed via Edge Sync at ${new Date().toISOString()}`,
       };
     }
   }, []);

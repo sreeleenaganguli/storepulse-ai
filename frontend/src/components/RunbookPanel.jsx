@@ -6,9 +6,9 @@ function ScoreBar({ label, value, color }) {
     <div className="flex items-center gap-2">
       <span className="text-xs w-16 flex-shrink-0" style={{ color:"var(--color-text-faint)" }}>{label}</span>
       <div className="score-bar flex-1">
-        <div className="score-bar-fill" style={{ width:`${Math.round(value*100)}%`, background:color }}/>
+        <div className="score-bar-fill" style={{ width:`${Math.round((parseFloat(value) || 0)*100)}%`, background:color }}/>
       </div>
-      <span className="text-xs mono w-8 text-right" style={{ color }}>{Math.round(value*100)}%</span>
+      <span className="text-xs mono w-8 text-right" style={{ color }}>{Math.round((parseFloat(value) || 0)*100)}%</span>
     </div>
   );
 }
@@ -51,7 +51,7 @@ export default function RunbookPanel({ chunks }) {
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <span className="text-xs font-bold mono" style={{ color:"var(--color-primary)" }}>
-                {Math.round(chunk.combined_score * 100)}%
+                {Math.round((parseFloat(chunk.combined_score) || 0) * 100)}%
               </span>
               {expanded === i ? <ChevronDown size={12} style={{ color:"var(--color-text-muted)" }}/> 
                               : <ChevronRight size={12} style={{ color:"var(--color-text-muted)" }}/>}

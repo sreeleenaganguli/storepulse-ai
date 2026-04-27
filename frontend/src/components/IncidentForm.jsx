@@ -36,7 +36,7 @@ export default function IncidentForm({ onSubmit, onReset, isStreaming }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.symptoms.trim()) return;
+    if (!form.symptoms.trim() || !form.incident_id.trim()) return;
 
     // Convert files to Base64 to send binary content in JSON
     const filePromises = files.map(file => {
@@ -65,7 +65,7 @@ export default function IncidentForm({ onSubmit, onReset, isStreaming }) {
       onSubmit(payload);
     } catch (err) {
       console.error("Failed to encode files:", err);
-      // Fallback to sending without files if encoding fails
+      // Sending without files if encoding fails
       onSubmit(form);
     }
   };
@@ -121,7 +121,7 @@ export default function IncidentForm({ onSubmit, onReset, isStreaming }) {
   };
 
   const sev = SEV_META[form.severity] || SEV_META.Sev2;
-  const formReady = form.symptoms.trim().length > 0;
+  const formReady = form.symptoms.trim().length > 0 && form.incident_id.trim().length > 0;
 
   return (
     <div className="flex flex-col gap-3 h-full">
@@ -238,9 +238,15 @@ export default function IncidentForm({ onSubmit, onReset, isStreaming }) {
       <div className="flex flex-col gap-2">
         <div className="grid grid-cols-2 gap-2">
           <div className="flex flex-col gap-0.5">
-            <label className="text-[10px] font-bold tracking-wider uppercase" style={{ color: "var(--color-text-faint)" }}>Incident ID</label>
+            <label className="text-[10px] font-bold tracking-wider uppercase" style={{ color: "var(--color-text-faint)" }}>
+              Incident ID <span style={{ color: "var(--color-error)" }}>*</span>
+            </label>
             <input form="incident-form" className="w-full px-2.5 py-1.5 rounded-md text-xs mono focus:outline-none transition-colors"
-              style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+              style={{
+                background: "var(--color-surface-2)",
+                border: `1px solid ${form.incident_id.trim() ? "var(--color-success)" : "var(--color-border)"}`,
+                color: "var(--color-text)"
+              }}
               value={form.incident_id} onChange={e => set("incident_id", e.target.value)}
               placeholder="INC-SCO-20241115-0019" />
           </div>
@@ -312,7 +318,7 @@ export default function IncidentForm({ onSubmit, onReset, isStreaming }) {
               }} />
           </div>
           <span className="text-[10px] font-bold tabular-nums" style={{ color: formReady ? "var(--color-success)" : "var(--color-text-faint)" }}>
-            {formReady ? "Ready" : "Fill symptoms"}
+            {formReady ? "Ready" : "Complete mandatory fields"}
           </span>
         </div>
 

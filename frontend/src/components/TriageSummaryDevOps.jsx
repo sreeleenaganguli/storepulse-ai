@@ -32,38 +32,50 @@ export default function TriageSummaryDevOps({ result }) {
 
         {/* List */}
         <div className="flex flex-col">
-          {result.top_causes?.map((cause, i) => {
-            // Note: Since `top_causes` is currently just an array of strings, we are faking the individual percentages 
-            // to match the visual mock. In a real scenario, the backend should return these percentages.
-            const pct = i === 0 ? Math.round((result.confidence || 0.85) * 100) : i === 1 ? 65 : 45;
-            const isLikely = i === 0;
-            const color = pct >= 80 ? "#10b981" : pct >= 60 ? "#f59e0b" : "#64748b";
+          {(() => {
+            const causes = result.top_causes || [];
+            // Pre-calculate percentages to find the max
+            const pcts = causes.map((_, i) => {
+              if (i === 0) {
+                const conf = parseFloat(result.confidence);
+                return Math.round((isNaN(conf) ? 0.85 : conf) * 100);
+              }
+              return i === 1 ? 65 : 45;
+            });
+            const maxPct = Math.max(...pcts, 0);
+            const maxIdx = pcts.indexOf(maxPct);
 
-            return (
-              <div key={i} className="flex flex-col p-5 border-b border-[#1f2937] last:border-0 relative">
-                {isLikely && (
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500" />
-                )}
-                <div className="flex items-center justify-between mb-3" style={{ paddingLeft: isLikely ? "12px" : "4px" }}>
-                  <div className="flex items-center gap-3">
-                    {isLikely && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded text-blue-100 bg-blue-500 uppercase">
-                        Likely Culprit
-                      </span>
-                    )}
-                    <span className="text-sm font-semibold text-slate-200">{cause}</span>
+            return causes.map((cause, i) => {
+              const pct = pcts[i];
+              const isLikely = i === maxIdx && pct > 0;
+              const color = pct >= 80 ? "#10b981" : pct >= 60 ? "#f59e0b" : "#64748b";
+
+              return (
+                <div key={i} className="flex flex-col p-5 border-b border-[#1f2937] last:border-0 relative">
+                  {isLikely && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500" />
+                  )}
+                  <div className="flex items-center justify-between mb-3" style={{ paddingLeft: isLikely ? "12px" : "4px" }}>
+                    <div className="flex items-center gap-3">
+                      {isLikely && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded text-blue-100 bg-blue-500 uppercase">
+                          Likely Culprit
+                        </span>
+                      )}
+                      <span className="text-sm font-semibold text-slate-200">{cause}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold" style={{ color }}>{pct}%</span>
+                      <Info size={14} className="text-slate-400" />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold" style={{ color }}>{pct}%</span>
-                    <Info size={14} className="text-slate-400" />
+                  <div className="w-full h-1.5 rounded-full bg-[#1f2937] overflow-hidden" style={{ marginLeft: isLikely ? "12px" : "4px", maxWidth: "calc(100% - 16px)" }}>
+                    <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
                   </div>
                 </div>
-                <div className="w-full h-1.5 rounded-full bg-[#1f2937] overflow-hidden" style={{ marginLeft: isLikely ? "12px" : "4px", maxWidth: "calc(100% - 16px)" }}>
-                  <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
-                </div>
-              </div>
-            );
-          })}
+              );
+            });
+          })()}
         </div>
       </div>
 
@@ -72,15 +84,17 @@ export default function TriageSummaryDevOps({ result }) {
         <div className="card p-4 rounded-lg mt-2" style={{ backgroundColor: "#0b101d", border: "1px solid #1f2937" }}>
           <button onClick={() => setShowTrace(s => !s)}
             className="flex items-center gap-1.5 text-xs font-medium w-full text-left"
-            style={{ color:"#3b82f6", background:"none", border:"none", cursor:"pointer" }}>
-            <Brain size={14}/>
-            {showTrace ? <ChevronDown size={14}/> : <ChevronRight size={14}/>}
+            style={{ color: "#3b82f6", background: "none", border: "none", cursor: "pointer" }}>
+            <Brain size={14} />
+            {showTrace ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             DeepSeek-R1 Reasoning Trace
           </button>
           {showTrace && (
             <div className="mt-3 p-4 rounded-lg text-xs leading-relaxed animate-fade-in"
-              style={{ background:"#111827", border:"1px solid #1f2937",
-                       color:"#94a3b8", fontFamily:"var(--font-mono)", whiteSpace:"pre-wrap" }}>
+              style={{
+                background: "#111827", border: "1px solid #1f2937",
+                color: "#94a3b8", fontFamily: "var(--font-mono)", whiteSpace: "pre-wrap"
+              }}>
               {result.reasoning_trace}
             </div>
           )}

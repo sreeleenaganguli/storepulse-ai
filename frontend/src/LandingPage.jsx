@@ -15,10 +15,20 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="h-screen overflow-hidden font-sans text-white flex flex-col" style={{ backgroundColor: "#060a11" }}>
+    <div className="h-screen overflow-hidden font-sans text-white flex flex-col relative animate-mesh" 
+         style={{ backgroundColor: "#060a11", backgroundImage: "radial-gradient(at 0% 0%, rgba(0, 212, 255, 0.05) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.05) 0px, transparent 50%)" }}>
+      
+      {/* Background Decorations */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[10%] left-[15%] w-[400px] h-[400px] rounded-full bg-cyan-500/5 blur-[120px] animate-float" />
+        <div className="absolute bottom-[10%] right-[10%] w-[500px] h-[500px] rounded-full bg-purple-500/5 blur-[150px] animate-float-slow" />
+        <div className="absolute top-[40%] right-[20%] w-[300px] h-[300px] rounded-full bg-blue-500/5 blur-[100px] animate-float" style={{ animationDelay: "-5s" }} />
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 contrast-150 brightness-100" />
+      </div>
+
       {/* Header */}
-      <header className="flex items-center justify-center pt-6 px-4 flex-shrink-0">
-        <div className="flex items-center justify-between px-6 py-3 rounded-full w-full max-w-6xl" style={{ backgroundColor: "#0e1526", border: "1px solid #1f2937" }}>
+      <header className="flex items-center justify-center pt-6 px-4 flex-shrink-0 z-10">
+        <div className="flex items-center justify-between px-6 py-3 rounded-full w-full max-w-6xl backdrop-blur-md shadow-lg" style={{ backgroundColor: "rgba(14, 21, 38, 0.8)", border: "1px solid rgba(31, 41, 55, 0.5)" }}>
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-8 h-8 rounded-full" style={{ backgroundColor: "#1e293b" }}>
               <Activity size={16} className="text-cyan-400" />
@@ -52,7 +62,7 @@ export default function LandingPage() {
             <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border w-max transition-colors ${health.checking ? "border-amber-900/50 bg-amber-950/30" : health.online ? "border-teal-900/50 bg-teal-950/30" : "border-rose-900/50 bg-rose-950/30"}`}>
               <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${health.checking ? "bg-amber-400" : health.online ? "bg-teal-400" : "bg-rose-400"}`}></div>
               <span className={`text-[10px] font-bold tracking-widest uppercase ${health.checking ? "text-amber-400" : health.online ? "text-teal-400" : "text-rose-400"}`}>
-                {health.checking ? "Connecting to Backend..." : health.online ? "Incident Copilot Online" : "Backend Offline"}
+                {health.checking ? "Connecting to Backend..." : health.online ? "Incident Copilot Online" : "Backend Service Unavailable"}
               </span>
             </div>
             
@@ -100,7 +110,7 @@ export default function LandingPage() {
       </main>
 
       {/* Footer - Compact */}
-      <footer className="border-t border-[#1f2937] bg-[#0a0f18] flex-shrink-0">
+      <footer className="border-t border-[#1f2937] bg-[#0a0f18]/80 backdrop-blur-md flex-shrink-0 z-10">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">

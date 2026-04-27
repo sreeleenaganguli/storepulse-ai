@@ -23,6 +23,7 @@ export default function IncidentForm({ onSubmit, onReset, isStreaming }) {
   const [activeDemo, setActiveDemo] = useState(null);
   const [showIngest, setShowIngest] = useState(true);
   const [files, setFiles] = useState([]);
+  const [logSnippet, setLogSnippet] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -55,10 +56,11 @@ export default function IncidentForm({ onSubmit, onReset, isStreaming }) {
 
     try {
       const encodedFiles = await Promise.all(filePromises);
-      
+
       const payload = {
         ...form,
-        log_file_reference: encodedFiles
+        log_snippet: logSnippet,
+        // log_file_reference: encodedFiles
       };
 
       console.log("Form submitted with binary content (Base64):", payload);
@@ -66,49 +68,49 @@ export default function IncidentForm({ onSubmit, onReset, isStreaming }) {
     } catch (err) {
       console.error("Failed to encode files:", err);
       // Sending without files if encoding fails
-      onSubmit(form);
+      onSubmit({ ...form, log_snippet: logSnippet });
     }
   };
 
-  const handleReset = () => { setForm(EMPTY); onReset(); setActiveDemo(null); setFiles([]); };
+  const handleReset = () => { setForm(EMPTY); onReset(); setActiveDemo(null); setFiles([]); setLogSnippet(""); };
 
   // ── File handling ──────────────────────────────────────────────────
-  const ACCEPTED = [".jsonl", ".json", ".txt", ".log", ".md"];
+  const ACCEPTED = [".json"];
   const MAX_SIZE = 10 * 1024 * 1024;
 
   const parseAndApplyFile = useCallback(async (file) => {
     const text = await file.text();
     const ext = file.name.split(".").pop().toLowerCase();
-    if (ext === "jsonl") {
+    if (ext === "json") {
       try {
-        const firstLine = text.split("\n").find(l => l.trim());
-        if (firstLine) {
-          const obj = JSON.parse(firstLine);
-          if (obj.symptoms) set("symptoms", obj.symptoms);
-          if (obj.service) set("service", obj.service);
-          if (obj.severity) set("severity", obj.severity);
-          if (obj.incident_id) set("incident_id", obj.incident_id);
-        }
-      } catch { /* skip */ }
-    } else if (ext === "txt" || ext === "log") {
-      // Logic for log_snippet removed as per request
-    } else if (ext === "md") {
-      if (!form.symptoms.trim()) {
-        set("symptoms", `[Runbook attached: ${file.name}] Review uploaded runbook for context.`);
+        const obj = JSON.parse(text);
+        // Minify the JSON to remove \n, \t, and extra spaces
+        setLogSnippet(JSON.stringify(obj));
+
+        if (obj.symptoms) set("symptoms", obj.symptoms);
+        if (obj.service) set("service", obj.service);
+        if (obj.severity) set("severity", obj.severity);
+        if (obj.incident_id) set("incident_id", obj.incident_id);
+      } catch {
+        // Fallback: simply strip newlines and multiple spaces if parsing fails
+        setLogSnippet(text.replace(/[\n\r\t]+/g, ' ').replace(/\s{2,}/g, ' ').trim());
       }
     }
-  }, [form.symptoms]);
+  }, []);
 
   const handleFiles = useCallback((newFiles) => {
     const valid = Array.from(newFiles).filter(f => {
       const ext = "." + f.name.split(".").pop().toLowerCase();
       return ACCEPTED.includes(ext) && f.size <= MAX_SIZE;
     });
-    setFiles(prev => [...prev, ...valid]);
-    valid.forEach(f => parseAndApplyFile(f));
+    if (valid.length > 0) {
+      const singleFile = valid[0];
+      setFiles([singleFile]);
+      parseAndApplyFile(singleFile);
+    }
   }, [parseAndApplyFile]);
 
-  const removeFile = (idx) => setFiles(prev => prev.filter((_, i) => i !== idx));
+  const removeFile = () => { setFiles([]); setLogSnippet(""); };
 
   const onDrop = useCallback((e) => { e.preventDefault(); setIsDragging(false); handleFiles(e.dataTransfer.files); }, [handleFiles]);
   const onDragOver = useCallback((e) => { e.preventDefault(); setIsDragging(true); }, []);
@@ -117,7 +119,9 @@ export default function IncidentForm({ onSubmit, onReset, isStreaming }) {
   const seedDemoData = () => {
     const demo = DEMO_INCIDENTS[0];
     setForm({ ...demo.incident });
-    setFiles([new File([JSON.stringify(demo.incident)], "seed_incident.jsonl", { type: "application/jsonl" })]);
+    const jsonStr = JSON.stringify(demo.incident);
+    setFiles([new File([jsonStr], "seed_incident.json", { type: "application/json" })]);
+    setLogSnippet(jsonStr);
   };
 
   const sev = SEV_META[form.severity] || SEV_META.Sev2;
@@ -126,7 +130,9 @@ export default function IncidentForm({ onSubmit, onReset, isStreaming }) {
   return (
     <div className="flex flex-col gap-3 h-full">
 
-      <form onSubmit={handleSubmit} id="incident-form" className="hidden" />
+      <form onSubmit={handleSubmit} id="incident-form" className="hidden">
+        <input type="hidden" id="jsonCatcher" name="log_snippet" value={logSnippet} />
+      </form>
 
       {/* ── Demo Chips ──────────────────────────────────────────────── */}
       <div>
@@ -203,9 +209,9 @@ export default function IncidentForm({ onSubmit, onReset, isStreaming }) {
                 Drag & drop files here, or click to select
               </div>
               <div className="text-[9px] text-center" style={{ color: "var(--color-text-faint)" }}>
-                .jsonl, .json, .txt, .log, .md (Max 10MB)
+                .json (Max 10MB)
               </div>
-              <input ref={fileInputRef} type="file" multiple accept=".jsonl,.json,.txt,.log,.md"
+              <input ref={fileInputRef} type="file" accept=".json"
                 className="hidden" onChange={e => { handleFiles(e.target.files); e.target.value = ""; }} />
             </div>
 
@@ -219,7 +225,7 @@ export default function IncidentForm({ onSubmit, onReset, isStreaming }) {
                       <FileText size={12} style={{ color: "var(--color-text-faint)", flexShrink: 0 }} />
                       <span className="text-[11px] truncate" style={{ color: "var(--color-text)" }}>{f.name}</span>
                     </div>
-                    <button type="button" onClick={() => removeFile(i)}
+                    <button type="button" onClick={removeFile}
                       className="p-0.5 rounded transition-colors hover:text-rose-400 flex-shrink-0"
                       style={{ background: "none", border: "none", color: "var(--color-text-faint)", cursor: "pointer" }}>
                       <X size={12} />

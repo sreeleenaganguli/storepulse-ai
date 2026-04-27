@@ -17,7 +17,7 @@ export const DEMO_INCIDENTS = [
       incident_id: "INC-RCP-20241108-0041",
       service: "receipt-service",
       severity: "Sev2",
-      symptoms: "Receipt printers offline on 12 tills in Store 217. Customers not receiving paper receipts after payment. PRINTER_OFFLINE_ERR across lanes 3-14.",
+      symptoms: "Receipt printers disconnected on 12 tills in Store 217. Customers not receiving paper receipts after payment. PRINTER_DISCONNECTED_ERR across lanes 3-14.",
       created: "2024-11-08T09:15:00Z",
     },
   },

@@ -118,12 +118,17 @@ export function useTriageStream() {
     }
   }, [reset, runFallback]);
 
-  const confirm = useCallback(async (incidentId, confirmedSteps, rejectedSteps) => {
+  const confirm = useCallback(async (incidentId, confirmedSteps, rejectedSteps, triageContext) => {
     try {
       const res = await fetch(ENDPOINTS.CONFIRM, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ incident_id: incidentId, confirmed_steps: confirmedSteps, rejected_steps: rejectedSteps }),
+        body: JSON.stringify({
+          incident_id: incidentId,
+          confirmed_steps: confirmedSteps,
+          rejected_steps: rejectedSteps,
+          triage_context: triageContext || null,
+        }),
       });
       return res.json();
     } catch {

@@ -1,4 +1,4 @@
-﻿"""StorePulse AI — FastAPI application entry point."""
+"""StorePulse AI — FastAPI application entry point."""
 import json, asyncio, logging
 from datetime import datetime, timezone
 from typing import AsyncGenerator, Optional
@@ -14,7 +14,7 @@ from state import AgentState
 from graph import compiled_graph
 from rag.indexer import startup_index
 from rag.redactor import redact_incident
-from rag.feedback_loop import save_feedback, build_feedback_context
+from rag.feedback_loop import save_feedback, build_feedback_context, save_confirmation, build_confirmation_context
 from rag.embedder import cache_stats as embed_cache_stats
 from rag.response_cache import cache_stats as response_cache_stats
 
@@ -65,6 +65,7 @@ def _audit(record: dict):
 def _fallback_output(incident: IncidentInput, error: str, attempt: int, feedback_context: str) -> TriageOutput:
     return TriageOutput(
         incident_id=incident.incident_id,
+        service=incident.service,
         incident_summary=f"Automated triage unavailable for {incident.service} (attempt {attempt}). Manual review required.",
         probable_category="unknown",
         root_cause=f"Fallback: graph execution failed — {error}",
@@ -120,6 +121,12 @@ async def _stream_triage(
             await asyncio.sleep(0.7)
         _audit({"event": "triage_complete_mock", "incident_id": incident.incident_id})
         return
+
+    # ── Inject past confirmation history for this service ──────────────────
+    confirmation_ctx = build_confirmation_context(incident.service)
+    if confirmation_ctx:
+        log.info(f"[Triage] Injecting confirmation history for service '{incident.service}'")
+        feedback_context = f"{confirmation_ctx}\n{feedback_context}" if feedback_context else confirmation_ctx
 
     if feedback_context:
         yield {
@@ -179,6 +186,7 @@ async def _stream_triage(
     if final_state:
         output = TriageOutput(
             incident_id=incident.incident_id,
+            service=incident_clean.service,
             incident_summary=final_state.get("incident_summary", ""),
             probable_category=final_state.get("probable_category", "unknown"),
             root_cause=final_state.get("root_cause", ""),
@@ -321,6 +329,17 @@ async def confirm_actions(req: ConfirmRequest):
         "confirmed_steps": req.confirmed_steps,
         "rejected_steps":  req.rejected_steps,
     })
+
+    # ── Persist confirmation for cross-incident learning ───────────────────
+    service = (req.triage_context or {}).get("service", "unknown")
+    save_confirmation(
+        incident_id=req.incident_id,
+        service=service,
+        confirmed_steps=req.confirmed_steps,
+        rejected_steps=req.rejected_steps,
+        triage_context=req.triage_context,
+    )
+
     return {
         "status":          "confirmed",
         "incident_id":     req.incident_id,

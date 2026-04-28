@@ -22,7 +22,17 @@ export default function ActionPlan({ result, onConfirm }) {
     const confirmed = Object.entries(stepState).filter(([,v]) => v.status === "confirmed").map(([k]) => parseInt(k));
     const rejected  = Object.entries(stepState).filter(([,v]) => v.status === "rejected")
       .map(([k,v]) => ({ step: parseInt(k), reason: v.reason }));
-    const res = await onConfirm(result.incident_id, confirmed, rejected);
+
+    // Build triage context so the backend can learn from this interaction
+    const triageCtx = {
+      service: result.service || result.probable_category || "unknown",
+      probable_category: result.probable_category,
+      root_cause: result.root_cause,
+      confidence: result.confidence,
+      action_plan: result.action_plan,
+    };
+
+    const res = await onConfirm(result.incident_id, confirmed, rejected, triageCtx);
     setReceipt(res);
     setSubmitted(true);
   };

@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 from typing import Optional, List, Any, Dict
 from pydantic import BaseModel
 
@@ -40,6 +40,7 @@ class IncidentInput(BaseModel):
 
 class TriageOutput(BaseModel):
     incident_id: Optional[str] = ""
+    service: str = ""  # service name from incident input
     incident_summary: str = ""
     probable_category: str = "unknown"
     root_cause: str = ""
@@ -61,3 +62,4 @@ class ConfirmRequest(BaseModel):
     incident_id: str
     confirmed_steps: List[int] = []
     rejected_steps: List[Dict[str, Any]] = []
+    triage_context: Optional[Dict[str, Any]] = None  # category, root_cause, service, confidence, action_plan
